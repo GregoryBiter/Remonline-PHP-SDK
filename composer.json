@@ -1,0 +1,22 @@
+{
+    "name": "gregorybiter/remonline-sdk",
+    "description": "sdk viber bot rest",
+    "type": "metapackage",
+    "require": {
+        "monolog/monolog": "*",
+        "php-curl-class/php-curl-class": "^9.8",
+        "guzzlehttp/guzzle": "*"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "GBIT\\Remonline\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "GregoryBiter",
+            "email": "gregorybiter@gmail.com"
+        }
+    ]
+}
