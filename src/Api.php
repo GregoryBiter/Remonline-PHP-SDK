@@ -105,14 +105,20 @@ class Api
 
 
         $out = json_decode(curl_exec($ch), true);
-        $this->test($out);
+        //$this->test($out);
         if (curl_errno($ch)) {
-            //$this->push_logs(curl_error($ch), true);
-            return $out;
+            $this->push_logs(curl_error($ch), true);
+            throw new Exception('Request failed');
+        } else if ($out['success'] === false) {
+            $this->push_logs(curl_error($ch), true);
+            throw new Exception('Remonline failed: '. $out['message']);
         } else {
             $out['info'] = 'Order';
             return $out;
         }
+    }
+    private function error()
+    {
     }
 
     private function test($request)
@@ -126,15 +132,15 @@ class Api
             return var_dump($data);
         }
     }
-    // public static function push_logs($text, $error = false)
-    // {
+    public static function push_logs($text, $error = false)
+    {
 
-    //     $log = new Logger('debag');
-    //     $log->pushHandler(new StreamHandler('logs/request.log'));
-    //     if (!$error) {
-    //         $log->warning($text);
-    //     } else {
-    //         $log->error($text);
-    //     }
-    // }
+        $log = new Logger('debag');
+        $log->pushHandler(new StreamHandler('logs/error.log'));
+        if (!$error) {
+            $log->warning($text);
+        } else {
+            $log->error($text);
+        }
+    }
 }
