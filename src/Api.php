@@ -4,14 +4,13 @@ namespace GBIT\Remonline;
 
 use DateTime;
 use Exception;
-use Curl\Curl;
-use GuzzleHttp\Client;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
 class Api
 {
-    public Curl $curl;
+
+
     public $apiKey;
     protected $tokenInfo = [];
     public const APIURL = 'https://api.remonline.app/';
@@ -25,13 +24,16 @@ class Api
         if (!isset($apiKey)) {
             $apiKey = $this->apiKey;
         }
-        $curl = new Curl();
-        $curl->setHeader('Content-Type', 'application/json');
-        $curl->setDefaultJsonDecoder($assoc = true);
-        $curl->post(self::APIURL . "token/new", [
-            "api_key" => $this->apiKey
-        ]);
-        $our = $curl->response;
+
+        $ch = curl_init(self::APIURL . "token/new");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["api_key" => $apiKey]));
+
+        $our = json_decode(curl_exec($ch), true);
+        curl_close($ch);
+
         if ($our['success'] == true) {
             $this->tokenInfo = [
                 'token' => $our["token"],
@@ -58,9 +60,9 @@ class Api
                     foreach ($i_data as $v_key => $v) {
                         $stringPar = $stringPar . "&" . $i_key . "=" . strval($v);
                     }
-                } elseif($i_data == null){
+                } elseif ($i_data == null) {
                     null;
-                }else {
+                } else {
                     $stringPar += "&" . strval($i_data);
                 }
             }
@@ -68,43 +70,55 @@ class Api
         }
         return null;
     }
+    /**
+     * Send request to Remonline
+     *
+     * Undocumented function long description
+     *
+     * @param String $url url from Remonline
+     * @param Array $par data to requst 
+     * @param String $type "GET"/"POST"
+     * @return Array json out
+     **/
     public function api($url, $par, $type)
     {
-        $curl = new Curl();
-        self::push_logs("URL: " . json_encode($url) . "PAR: " . json_encode($par) . "Type: " . json_encode($type));
         $this->checkToken($url);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $headers = [
+            'Content-Type: application/json'
+        ];
         if ($type == "GET") {
-
-            $curl->setDefaultJsonDecoder($assoc = true);
-            $curl->get(self::APIURL . $url . '?' . http_build_query(["token" => $this->tokenInfo['token']]) . $this->toUrl($par));
+            curl_setopt($ch, CURLOPT_URL, self::APIURL . $url . '?' . http_build_query(["token" => $this->tokenInfo['token']]) . $this->toUrl($par));
+            //echo $this->toUrl($par);
         } else if ($type == "POST") {
-            $curl->setDefaultJsonDecoder($assoc = true);
-            $curl->setHeader('Content-Type', 'application/json');
-            $curl->post(self::APIURL . $url, [
-                "token" => $this->tokenInfo['token'],
-                $par
-            ]);
+            $headers = [
+                'Content-Type: application/json'
+            ];
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_URL, self::APIURL . $url);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["token" => $this->tokenInfo['token']] + $par));
         }
-        echo "<pre>";
-        if ($curl->error) {
-            // echo 'Error: ' . $curl->errorMessage . "\n";
-            // echo 'Response:' . var_dump($curl->response) . "\n";
-            return $curl->response;
-        } else {
 
-            $out = $curl->response;
+
+
+        $out = json_decode(curl_exec($ch), true);
+        $this->test($out);
+        if (curl_errno($ch)) {
+            //$this->push_logs(curl_error($ch), true);
+            return $out;
+        } else {
             $out['info'] = 'Order';
             return $out;
-            // echo 'Response:' . "\n";
-            // var_dump($curl->response);
         }
-        // var_dump($curl->requestHeaders);
-        // var_dump($curl->responseHeaders);
     }
 
     private function test($request)
     {
-        $data = json_decode($request, true);
+        //$data = json_decode($request, true);
+        $data = $request;
         if ($data['success'] == true || !$data['success'] == null) {
             return $data;
         } else {
@@ -112,15 +126,15 @@ class Api
             return var_dump($data);
         }
     }
-    public static function push_logs($text, $error = false)
-    {
+    // public static function push_logs($text, $error = false)
+    // {
 
-        $log = new Logger('debag');
-        $log->pushHandler(new StreamHandler('logs/viber-api.log'));
-        if (!$error) {
-            $log->warning($text);
-        } else {
-            $log->error($text);
-        }
-    }
+    //     $log = new Logger('debag');
+    //     $log->pushHandler(new StreamHandler('logs/request.log'));
+    //     if (!$error) {
+    //         $log->warning($text);
+    //     } else {
+    //         $log->error($text);
+    //     }
+    // }
 }

@@ -2,47 +2,53 @@
 
 namespace GBIT\Remonline\Models;
 
-use GBIT\Remonline\User;
+use GBIT\Remonline\Api;
 
-class Warehouse
+class Warehouse extends Models
 {
-
-    private $user;
-    public $count;
-    private $page;
-    public function __construct(User &$user)
+    public function get($branch_id = null)
     {
-        $this->user = $user;
-    }
-    public function get($arr = [])
-    {
-        return $this->user->api('order/', array_merge($arr, [
-            'page' => $this->page
+        $in_data = [];
+        $page = $this->page;
+        $this->page = null;
+        if ($branch_id != null) {
+            $in_data['branch_id'] = $branch_id;
+        }
+        return $this->user->api('order/', array_merge($in_data, [
+            'page' => $page
         ]), 'GET');
     }
-    public function page($page)
+    public function goods($warehouse_id, $categories = [], $exclude_zero_residue = false)
     {
-        $this->page = $page;
-        return $this;
+        $page = $this->page;
+        $this->page = null;
+        $in_data = array_merge($categories, ['page' => $this->page]);
+        $in_data['exclude_zero_residue'] = $exclude_zero_residue;
+        return $this->user->api('order/', array_merge($in_data, [
+            'page' => $page
+        ]), 'GET');
     }
-    public function getAllPage($arr = [])
-    {
-        $data = $this->user->api('order/', array_merge($arr), 'GET');
-        $countPage = $data['count'] / 50;
-        if ($data['count'] % 50 > 0) {
-            $countPage++;
-        }
 
-        for ($i = 1; $i <= $countPage; $i++) {
-            $response = $this->user->api('order/', array_merge($arr), 'GET');
-            array_merge($data['data'], $response['data']);
-        }
-        $data['page'] = 'All page';
-        return $data;
-    }
-    public function getCustomFields()
+
+
+    public function getCategories()
     {
-        $response = $this->user->api('order/custom-fields/', [], 'GET');
+        $response = $this->user->api('warehouse/categories/', [], 'GET');
+        return $response;
+    }
+    public function getWarehouse($branch_id = null)
+    {
+        $response = $this->user->api('warehouse/', ['$branch_id' => $branch_id], 'GET');
+        return $response;
+    }
+    public function getPostings($warehouse_id = null, $created_at = null, $ids = null)
+    {
+        $in_data = [];
+        if ($warehouse_id != null) {
+            $in_data = array_merge($in_data, ['page' => $this->page]);
+        }
+        $in_data = array_merge($warehouse_id = [], ['page' => $this->page]);
+        $response = $this->user->api('warehouse/', ['$branch_id' => $branch_id], 'GET');
         return $response;
     }
 }

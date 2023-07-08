@@ -34,22 +34,22 @@ class Order
     {
         return $this->user->api('order/', array_merge($arr, [
             'page' => $this->page,
-            'sort_dir'=>$this->sort_dir,
-            'types'=>$this->types,
-            'branches'=>$this->branches,
-            'brands'=>$this->brands,
-            'ids'=>$this->ids,
-            'id_labels[]'=>$this->id_labels,
-            'statuses'=>$this->statuses,
-            'managers'=>$this->managers,
-            'engineers'=>$this->engineers,
-            'clients_ids'=>$this->clients_ids,
-            'client_names'=>$this->client_names,
-            'client_phones'=>$this->client_phones,
-            'created_at'=>$this->created_at,
-            'done_at'=>$this->done_at,
-            'modified_at'=>$this->modified_at,
-            'closed_at'=>$this->closed_at
+            'sort_dir' => $this->sort_dir,
+            'types' => $this->types,
+            'branches' => $this->branches,
+            'brands' => $this->brands,
+            'ids' => $this->ids,
+            'id_labels[]' => $this->id_labels,
+            'statuses' => $this->statuses,
+            'managers' => $this->managers,
+            'engineers' => $this->engineers,
+            'clients_ids' => $this->clients_ids,
+            'client_names' => $this->client_names,
+            'client_phones' => $this->client_phones,
+            'created_at' => $this->created_at,
+            'done_at' => $this->done_at,
+            'modified_at' => $this->modified_at,
+            'closed_at' => $this->closed_at
         ]), 'GET');
     }
     public function page($page)
@@ -59,18 +59,18 @@ class Order
     }
     public function getAllPage($arr = [])
     {
-        $data = $this->user->api('order/', array_merge($arr), 'GET');
+        $data = $this->user->api('order/',  array_merge($arr), 'GET');
         $countPage = $data['count'] / 50;
         if ($data['count'] % 50 > 0) {
             $countPage++;
         }
-
+        $out['data'] = $data['data'];
         for ($i = 1; $i <= $countPage; $i++) {
-            $response = $this->user->api('order/', array_merge($arr), 'GET');
-            array_merge($data['data'], $response['data']);
+            $response = $this->user->api('order/', array_merge($arr, ['page'=> $i]), 'GET');
+            $out['data'] = array_merge($out['data'], $response['data'],);
         }
-        $data['page'] = 'All page';
-        return $data;
+        $doutata['page'] = 'All page';
+        return $out;
     }
     public function getCustomFields()
     {
