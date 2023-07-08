@@ -1,8 +1,8 @@
 <?php
 require __DIR__ . '/vendor/autoload.php';
 
-use GBIT\Remonline\Api;
-use GBIT\Remonline\Models\Order;
+use Gbit\Remonline\Api;
+use Gbit\Remonline\Models\Order;
 
 $reapi = new Api("your api key");
 $Order = new Order($api);

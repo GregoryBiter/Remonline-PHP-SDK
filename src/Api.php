@@ -1,6 +1,6 @@
 <?php
 
-namespace GBIT\Remonline;
+namespace Gbit\Remonline;
 
 use DateTime;
 use Exception;

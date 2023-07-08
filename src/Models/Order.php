@@ -1,8 +1,8 @@
 <?php
 
-namespace GBIT\Remonline\Models;
+namespace Gbit\Remonline\Models;
 
-use GBIT\Remonline\Api;
+use Gbit\Remonline\Api;
 
 class Order
 {
