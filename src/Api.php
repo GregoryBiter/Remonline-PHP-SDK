@@ -25,7 +25,7 @@ class Api
         if ($apiKey === null) {
             $apiKey = $this->apiKey;
         }
-    
+
         $url = self::APIURL . 'token/new';
         $data = [
             'api_key' => $apiKey,
@@ -33,37 +33,44 @@ class Api
         $headers = [
             'Content-Type: application/json',
         ];
-    
+
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    
+
         $response = json_decode(curl_exec($ch), true);
         $error = curl_error($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-    
+
         if ($error) {
             throw new Exception('Failed to make API request: ' . $error);
         }
-    
+
         if ($httpCode !== 200 || !$response['success']) {
             throw new Exception('Failed to get token: ' . $response['message']);
         }
-    
+
         $this->tokenInfo = [
             'token' => $response['token'],
             'ts' => time(),
         ];
     }
+    /**
+     * @param string $url pass url
+     */
     private function checkToken($url): void
     {
         if ($url != 'token/new')
             if (!isset($this->tokenInfo['token']) || $this->tokenInfo['token'] != NULL || time() - $this->tokenInfo['ts'] >= 580)
                 $this->getToken();
     }
+    /**
+     * @param array $params the query parameters
+     * @return string url query to Remonline
+     */
     private function toUrl($params)
     {
         $urlParams = '';
