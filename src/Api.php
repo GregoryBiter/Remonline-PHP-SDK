@@ -71,6 +71,7 @@ class Api
      * @param array $params the query parameters
      * @return string url query to Remonline
      */
+    
     private function toUrl($params)
     {
         $urlParams = '';
