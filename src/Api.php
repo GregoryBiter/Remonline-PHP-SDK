@@ -9,8 +9,6 @@ use Monolog\Handler\StreamHandler;
 
 class Api
 {
-
-
     public $apiKey;
     protected $tokenInfo = [];
     public const APIURL = 'https://api.remonline.app/';
@@ -21,16 +19,13 @@ class Api
     }
     public function getToken($apiKey = null)
     {
-        if (!isset($apiKey)) {
+        if (!isset($apiKey))
             $apiKey = $this->apiKey;
-        }
-
         $ch = curl_init(self::APIURL . "token/new");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["api_key" => $apiKey]));
-
         $our = json_decode(curl_exec($ch), true);
         curl_close($ch);
 
@@ -43,11 +38,9 @@ class Api
     }
     private function checkToken($url)
     {
-        if ($url != 'token/new') {
-            if (!isset($this->tokenInfo['token']) || $this->tokenInfo['token'] != NULL || time() - $this->tokenInfo['ts'] >= 580) {
+        if ($url != 'token/new')
+            if (!isset($this->tokenInfo['token']) || $this->tokenInfo['token'] != NULL || time() - $this->tokenInfo['ts'] >= 580)
                 $this->getToken();
-            }
-        }
     }
     private function toUrl($par)
     {
@@ -80,7 +73,7 @@ class Api
      * @param String $type "GET"/"POST"
      * @return Array json out
      **/
-    public function api($url, $par, $type)
+    public function api($url, $par, $type, $list = null)
     {
         $this->checkToken($url);
 
@@ -101,35 +94,19 @@ class Api
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["token" => $this->tokenInfo['token']] + $par));
         }
-
-
-
-        $out = json_decode(curl_exec($ch), true);
-        //$this->test($out);
+        $request = json_decode(curl_exec($ch), true);
         if (curl_errno($ch)) {
             $this->push_logs(curl_error($ch), true);
             throw new Exception('Request failed');
-        } else if ($out['success'] === false) {
-            $this->push_logs(curl_error($ch), true);
-            throw new Exception('Remonline failed: '. $out['message']);
+        } else if ($request['success'] === false) {
+            $this->push_logs($request, true);
+            throw new Exception('Remonline failed: ' . $request['message']);
         } else {
-            $out['info'] = 'Order';
-            return $out;
-        }
-    }
-    private function error()
-    {
-    }
+            if ($list) {
+                $request['list'] = 'Order';
+            }
 
-    private function test($request)
-    {
-        //$data = json_decode($request, true);
-        $data = $request;
-        if ($data['success'] == true || !$data['success'] == null) {
-            return $data;
-        } else {
-            throw new Exception('Error: ' .  var_dump($data));
-            return var_dump($data);
+            return $request;
         }
     }
     public static function push_logs($text, $error = false)
@@ -138,9 +115,9 @@ class Api
         $log = new Logger('debag');
         $log->pushHandler(new StreamHandler('logs/error.log'));
         if (!$error) {
-            $log->warning($text);
+            $log->warning(json_encode($text));
         } else {
-            $log->error($text);
+            $log->error(json_encode($text));
         }
     }
 }
