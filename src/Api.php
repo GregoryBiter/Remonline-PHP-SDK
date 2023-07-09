@@ -1,6 +1,6 @@
 <?php
 
-namespace GBIT\Remonline;
+namespace Gbit\Remonline;
 
 use DateTime;
 use Exception;
@@ -9,8 +9,6 @@ use Monolog\Handler\StreamHandler;
 
 class Api
 {
-
-
     public $apiKey;
     protected $tokenInfo = [];
     public const APIURL = 'https://api.remonline.app/';
@@ -19,68 +17,87 @@ class Api
         $this->apiKey = $apiKey;
         $this->tokenInfo['token'] = NULL;
     }
-    public function getToken($apiKey = null)
+    /**
+     * @param string $apiKey key api Remonlie
+     */
+    public function getToken($apiKey = null): void
     {
-        if (!isset($apiKey)) {
+        if ($apiKey === null) {
             $apiKey = $this->apiKey;
         }
 
-        $ch = curl_init(self::APIURL . "token/new");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["api_key" => $apiKey]));
+        $url = self::APIURL . 'token/new';
+        $data = [
+            'api_key' => $apiKey,
+        ];
+        $headers = [
+            'Content-Type: application/json',
+        ];
 
-        $our = json_decode(curl_exec($ch), true);
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+        $response = json_decode(curl_exec($ch), true);
+        $error = curl_error($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($our['success'] == true) {
-            $this->tokenInfo = [
-                'token' => $our["token"],
-                'ts' => time()
-            ];
+        if ($error) {
+            throw new Exception('Failed to make API request: ' . $error);
         }
-    }
-    private function checkToken($url)
-    {
-        if ($url != 'token/new') {
-            if (!isset($this->tokenInfo['token']) || $this->tokenInfo['token'] != NULL || time() - $this->tokenInfo['ts'] >= 580) {
-                $this->getToken();
-            }
+
+        if ($httpCode !== 200 || !$response['success']) {
+            throw new Exception('Failed to get token: ' . $response['message']);
         }
-    }
-    private function toUrl($par)
-    {
-        $stringPar = null;
-        if (!$par == "" || !$par == null) {
-            foreach ($par as $i_key => $i_data) {
-                if (is_numeric($i_data)) {
-                    $stringPar = $stringPar . "&" . $i_key . "=" . strval($i_data);
-                } else if (is_array($i_data)) {
-                    foreach ($i_data as $v_key => $v) {
-                        $stringPar = $stringPar . "&" . $i_key . "=" . strval($v);
-                    }
-                } elseif ($i_data == null) {
-                    null;
-                } else {
-                    $stringPar += "&" . strval($i_data);
-                }
-            }
-            return $stringPar;
-        }
-        return null;
+
+        $this->tokenInfo = [
+            'token' => $response['token'],
+            'ts' => time(),
+        ];
     }
     /**
-     * Send request to Remonline
-     *
-     * Undocumented function long description
-     *
-     * @param String $url url from Remonline
-     * @param Array $par data to requst 
-     * @param String $type "GET"/"POST"
-     * @return Array json out
-     **/
-    public function api($url, $par, $type)
+     * @param string $url pass url
+     */
+    private function checkToken($url): void
+    {
+        if ($url != 'token/new')
+            if (!isset($this->tokenInfo['token']) || $this->tokenInfo['token'] != NULL || time() - $this->tokenInfo['ts'] >= 580)
+                $this->getToken();
+    }
+    /**
+     * @param array $params the query parameters
+     * @return string url query to Remonline
+     */
+    private function toUrl($params)
+    {
+        $urlParams = '';
+
+        if (!empty($params) && is_array($params)) {
+            foreach ($params as $key => $value) {
+                if (is_numeric($value)) {
+                    $urlParams .= '&' . $key . '=' . strval($value);
+                } elseif (is_array($value)) {
+                    foreach ($value as $subKey => $subValue) {
+                        $urlParams .= '&' . $key . '=' . strval($subValue);
+                    }
+                }
+            }
+        }
+
+        return $urlParams;
+    }
+
+    /**
+     * @param string $url
+     * @param array $params
+     * @param string $type
+     * @param string|null $model
+     * @return array
+     */
+    public function api(string $url, array $params, string $type, string $model = null): array
     {
         $this->checkToken($url);
 
@@ -89,52 +106,47 @@ class Api
         $headers = [
             'Content-Type: application/json'
         ];
-        if ($type == "GET") {
-            curl_setopt($ch, CURLOPT_URL, self::APIURL . $url . '?' . http_build_query(["token" => $this->tokenInfo['token']]) . $this->toUrl($par));
-            //echo $this->toUrl($par);
-        } else if ($type == "POST") {
-            $headers = [
-                'Content-Type: application/json'
-            ];
+
+        if ($type === "GET") {
+            $queryString = http_build_query(["token" => $this->tokenInfo['token']]) . $this->toUrl($params);
+            curl_setopt($ch, CURLOPT_URL, self::APIURL . $url . '?' . $queryString);
+        } else if ($type === "POST") {
+            $requestData = ["token" => $this->tokenInfo['token']] + $params;
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_URL, self::APIURL . $url);
             curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["token" => $this->tokenInfo['token']] + $par));
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestData));
         }
-
-
-
-        $out = json_decode(curl_exec($ch), true);
-        $this->test($out);
+        $request = json_decode(curl_exec($ch), true);
         if (curl_errno($ch)) {
-            //$this->push_logs(curl_error($ch), true);
-            return $out;
+            $this->push_logs(curl_error($ch), true);
+            throw new Exception('Request failed');
+        } else if ($request['success'] === false) {
+            $this->push_logs($request, true);
+            throw new Exception('Remonline failed: ' . $request['message']);
         } else {
-            $out['info'] = 'Order';
-            return $out;
+            if ($model) {
+                $request['model'] = $model;
+            }
+
+            return $request;
         }
     }
-
-    private function test($request)
+    /**
+     * @param $text Message error
+     * @param $error Boolean error/warning
+     * @return none
+     * @throws
+     **/
+    public static function push_logs($text, $error = false): void
     {
-        //$data = json_decode($request, true);
-        $data = $request;
-        if ($data['success'] == true || !$data['success'] == null) {
-            return $data;
+
+        $log = new Logger('debag');
+        $log->pushHandler(new StreamHandler('logs/error.log'));
+        if (!$error) {
+            $log->warning(json_encode($text));
         } else {
-            throw new Exception('Error: ' .  var_dump($data));
-            return var_dump($data);
+            $log->error(json_encode($text));
         }
     }
-    // public static function push_logs($text, $error = false)
-    // {
-
-    //     $log = new Logger('debag');
-    //     $log->pushHandler(new StreamHandler('logs/request.log'));
-    //     if (!$error) {
-    //         $log->warning($text);
-    //     } else {
-    //         $log->error($text);
-    //     }
-    // }
 }

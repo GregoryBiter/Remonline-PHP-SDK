@@ -1,15 +1,18 @@
 {
     "name": "gregorybiter/remonline-sdk",
     "description": "sdk viber bot rest",
-    "type": "metapackage",
+    "type": "library",
     "require": {
         "monolog/monolog": "*"
     },
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "GBIT\\Remonline\\": "src/"
+            "Gbit\\Remonline\\": "src/"
         }
+    },
+    "config": {
+        "sort-packages": true
     },
     "authors": [
         {
