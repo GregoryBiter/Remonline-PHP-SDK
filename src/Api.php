@@ -42,27 +42,25 @@ class Api
             if (!isset($this->tokenInfo['token']) || $this->tokenInfo['token'] != NULL || time() - $this->tokenInfo['ts'] >= 580)
                 $this->getToken();
     }
-    private function toUrl($par)
+    private function toUrl($params)
     {
-        $stringPar = null;
-        if (!$par == "" || !$par == null) {
-            foreach ($par as $i_key => $i_data) {
-                if (is_numeric($i_data)) {
-                    $stringPar = $stringPar . "&" . $i_key . "=" . strval($i_data);
-                } else if (is_array($i_data)) {
-                    foreach ($i_data as $v_key => $v) {
-                        $stringPar = $stringPar . "&" . $i_key . "=" . strval($v);
+        $urlParams = '';
+        
+        if (!empty($params) && is_array($params)) {
+            foreach ($params as $key => $value) {
+                if (is_numeric($value)) {
+                    $urlParams .= '&' . $key . '=' . strval($value);
+                } elseif (is_array($value)) {
+                    foreach ($value as $subKey => $subValue) {
+                        $urlParams .= '&' . $key . '=' . strval($subValue);
                     }
-                } elseif ($i_data == null) {
-                    null;
-                } else {
-                    $stringPar += "&" . strval($i_data);
                 }
             }
-            return $stringPar;
         }
-        return null;
+        
+        return $urlParams;
     }
+    
     /**
      * Send request to Remonline
      *
