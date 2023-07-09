@@ -2,7 +2,8 @@
 Remonline CRM SDK in PHP
 ## How to start?
 
-```php 
+```php
+composer require gregorybiter/remonline-sdk
 composer install
 php -S localhost:8080
 ```
