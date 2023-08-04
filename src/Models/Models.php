@@ -16,20 +16,20 @@ class Models
         $this->api = new Api($api);
     }
 
-    public function __set($name, $value)
-    {
-        if (isset($this->map[$name])) {
-            $this->data[$this->map[$name]] = $value;
-        }
-    }
+    // public function __set($name, $value)
+    // {
+    //     if (isset($this->map[$name])) {
+    //         $this->data[$this->map[$name]] = $value;
+    //     }
+    // }
 
-    public function __get($name)
-    {
-        if (isset($this->map[$name])) {
-            return $this->data[$this->map[$name]] ?? null;
-        }
-        return null;
-    }
+    // public function __get($name)
+    // {
+    //     if (isset($this->map[$name])) {
+    //         return $this->data[$this->map[$name]] ?? null;
+    //     }
+    //     return null;
+    // }
     protected function getAllMapFields()
     {
         $mapArray = [];
@@ -42,6 +42,15 @@ class Models
         }
 
         return $mapArray;
+    }
+// TODO сделать фильтр работающий с массивом вида ['sort_dir' => 'asc', 'types' => 'electronics']
+    public function filter(array $filter)
+    {
+        foreach ($filter as $key => $value) {
+            if (isset($this->map[$key])) {
+                $this->data[$this->map[$key]] = $value;
+            }
+        }
     }
     protected function getData($endpoint, $arr = [], $getAllPage = false)
     {
