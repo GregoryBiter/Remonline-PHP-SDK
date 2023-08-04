@@ -7,15 +7,13 @@ composer install
 php -S localhost:8080
 ```
 ## How to use?
-```php require __DIR__ . '/vendor/autoload.php';
+```php 
+require __DIR__ . '/vendor/autoload.php';
 
-use Gbit\Remonline\Api;
 use Gbit\Remonline\Models\Order;
 
-
-$api = new Api("your api key");
-$order = new Order($api);
-echo $order->page(1)->get();
+$order = new Order("your api key");
+echo $order->filter(['sort_dir' => 'asc'])->get();
 echo $order->getCustomFields();
 ```
 

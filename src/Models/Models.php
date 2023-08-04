@@ -30,7 +30,7 @@ class Models
         }
         return null;
     }
-    private function getAllMapFields()
+    protected function getAllMapFields()
     {
         $mapArray = [];
 

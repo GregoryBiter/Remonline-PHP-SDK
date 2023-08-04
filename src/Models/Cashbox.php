@@ -14,13 +14,19 @@ class Cashbox extends Models
     {
         parent::__construct($api);
     }
-    public function get($arr = [], $getAllPage = false)
+    public function get($getAllPage = false, array $array = null)
     {
-        return $this->getData('cashbox/', $arr, $getAllPage);
+        if ($array == null) {
+            $array = $this->getAllMapFields();
+        }
+        return $this->getData('cashbox/', $array, $getAllPage);
     }
-    public function getReport($cashbox_id, $arr = [])
+    public function getReport($cashbox_id, $getAllPage = false, $array = null)
     {
-        return $this->getData('cashbox/report/'.$cashbox_id, $arr, false);
+        if ($array == null) {
+            $array = $this->getAllMapFields();
+        }
+        return $this->getData('cashbox/report/'.$cashbox_id, $array, $getAllPage);
     }
 
 }
