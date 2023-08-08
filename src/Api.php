@@ -122,7 +122,7 @@ class Api
         if (curl_error($ch)) {
             $this->push_logs(curl_error($ch), true);
             throw new Exception('Request failed');
-        } else if ($request['success'] === false) {
+        } else if (isset($request['success']) && $request['success'] !== false) {
             $this->push_logs($request, true);
             throw new Exception('Remonline failed: ' . $request['message']);
         } else {
