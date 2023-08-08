@@ -119,7 +119,7 @@ class Api
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestData));
         }
         $request = json_decode(curl_exec($ch), true);
-        if (curl_errno($ch)) {
+        if (curl_error($ch)) {
             $this->push_logs(curl_error($ch), true);
             throw new Exception('Request failed');
         } else if ($request['success'] === false) {
