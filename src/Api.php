@@ -124,7 +124,7 @@ class Api
             throw new Exception('Request failed');
         } else if ($request['success'] === false) {
             $this->push_logs($request, true);
-            throw new Exception('Remonline failed: ' . $request['message']);
+            throw new Exception('Remonline failed: ' . json_encode($request));
         } else {
             if ($model) {
                 $request['model'] = $model;
