@@ -6,28 +6,53 @@ use Gbit\Remonline\Api;
 
 class Warehouse extends Models
 {
-    public function get($branch_id = null)
+
+    public function __construct(string $api)
     {
-        $in_data = [];
-        $page = $this->page;
-        $this->page = null;
-        if ($branch_id != null) {
-            $in_data['branch_id'] = $branch_id;
-        }
-        return $this->user->api('order/', array_merge($in_data, [
-            'page' => $page
-        ]), 'GET');
+        parent::__construct($api);
     }
-    public function goods($warehouse_id, $categories = [], $exclude_zero_residue = false)
+
+    public function get($branch_id = null, bool $getAllPage = false): array
     {
-        $page = $this->page;
-        $this->page = null;
-        $in_data = array_merge($categories, ['page' => $this->page]);
-        $in_data['exclude_zero_residue'] = $exclude_zero_residue;
-        return $this->user->api('order/', array_merge($in_data, [
-            'page' => $page
-        ]), 'GET');
+        return $this->getData('warehouse/', ['branch_id' => $branch_id], $getAllPage);
     }
+
+
+    /**
+     * undocumented function summary
+     *
+     * Undocumented function long description
+     *
+     * @param Type $var Description
+     * @return type
+     * @throws conditon
+     **/
+    public function goods($warehouse_id, $categories = [], $exclude_zero_residue = false, int $page = null, bool $getAllPage = false): array
+    {
+        return $this->getData(
+            'warehouse/goods/' . $warehouse_id,
+            [
+                'categories' => $categories,
+                'exclude_zero_residue' => $exclude_zero_residue,
+                'page' => $page
+            ],
+            $getAllPage
+        );
+    }
+
+
+
+
+    // public function goods($warehouse_id, $categories = [], $exclude_zero_residue = false)
+    // {
+    //     $page = $this->page;
+    //     $this->page = null;
+    //     $in_data = array_merge($categories, ['page' => $this->page]);
+    //     $in_data['exclude_zero_residue'] = $exclude_zero_residue;
+    //     return $this->user->api('order/', array_merge($in_data, [
+    //         'page' => $page
+    //     ]), 'GET');
+    // }
 
 
 
