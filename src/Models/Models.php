@@ -2,18 +2,18 @@
 
 namespace Gbit\Remonline\Models;
 
-use Gbit\Remonline\Api;
+use Gbit\Remonline\RemonlineClient;
 
-class Models
+abstract class Models
 {
     protected $api;
-    protected $map = [];
+    private $map = [];
 
     protected $data = [];
 
-    public function __construct(string $api)
+    public function __construct(RemonlineClient $api)
     {
-        $this->api = new Api($api);
+        $this->api = $api;
     }
 
     // public function __set($name, $value)
@@ -52,23 +52,5 @@ class Models
             }
         }
     }
-    protected function getData($endpoint, $arr = [], $getAllPage = false)
-    {
-        $out = [];
-        $data = $this->api->api($endpoint, array_merge($arr), 'GET');
-        $out['data'] = $data['data'];
-        if ($getAllPage) {
-            $countPage = $data['count'] / 50;
-            if ($data['count'] % 50 > 0) {
-                $countPage++;
-            }
-            
-            for ($i = 1; $i <= $countPage; $i++) {
-                $response = $this->api->api($endpoint, array_merge($arr, ['page' => $i]), 'GET');
-                $out['data'] = array_merge($out['data'], $response['data']);
-            }
-        }
-        $out['count'] = $data['count'];
-        return $out;
-    }
+
 }

@@ -2,31 +2,33 @@
 
 namespace Gbit\Remonline\Models;
 
-use Gbit\Remonline\Api;
+use Gbit\Remonline\RemonlineClient;
 
 class Cashbox extends Models
 {
-    // private $user;
-    protected $map = [
-
-    ];
-    public function __construct(string $api)
+    public function __construct(RemonlineClient $api)
     {
         parent::__construct($api);
     }
-    public function get($getAllPage = false, array $array = null)
+    
+    public function getCashbox(): array
     {
-        if ($array == null) {
-            $array = $this->getAllMapFields();
-        }
-        return $this->getData('cashbox/', $array, $getAllPage);
-    }
-    public function getReport($cashbox_id, $getAllPage = false, $array = null)
-    {
-        if ($array == null) {
-            $array = $this->getAllMapFields();
-        }
-        return $this->getData('cashbox/report/'.$cashbox_id, $array, $getAllPage);
+        return $this->api->getData('cashbox/', []);
     }
 
+    public function getCashboxTransactions(int $cashbox_id, array $filter_data = [], bool $getAllPage)  : array
+    {
+        $endpoint = 'cashbox/report/' . $cashbox_id;
+        return $this->api->getData($endpoint,  $filter_data, $getAllPage);
+    }
+    
+    public function getCashflowItems(): array
+    {
+        return $this->api->getData('cashflowitems/', []);
+    }
+
+    public function createPayment($data = []): array
+    {
+        return $this->api->request('cashbox/payment/', $data, 'POST');
+    }
 }

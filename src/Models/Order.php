@@ -2,7 +2,7 @@
 
 namespace Gbit\Remonline\Models;
 
-use Gbit\Remonline\Api;
+use Gbit\Remonline\RemonlineClient;
 
 class Order extends Models
 {
@@ -24,24 +24,24 @@ class Order extends Models
         'modified_at' => '',
         'closed_at' => ''
     ];
-    public function __construct(string $api)
+    public function __construct(RemonlineClient $api)
     {
         parent::__construct($api);
     }
     
 
-    public function get(array $arr = [], bool $getAllPage = false): array
+    public function getOrder(array $arr = [], bool $getAllPage = false): array
     {
-        return $this->getData('order/', $arr, $getAllPage);
+        return $this->api->getData('order/', $arr, $getAllPage);
     }
 
     public function getCustomFields(): array
     {
-        return $this->getData('order/custom-fields/', [], true);
+        return $this->api->getData('order/custom-fields/', [], true);
     }
     public function getType(): array
     {
-        return $this->getData('order/types/', [], true);
+        return $this->api->getData('order/types/', [], true);
     }
     public function create(
         $branch_id, // индитефикатор локации
@@ -49,10 +49,10 @@ class Order extends Models
         $data = []
     ): array {
         $json = array_merge($data, ['branch_id' => $branch_id, "order_type" => $order_type]);
-        return $response = $this->user->api('order/', $json, 'POST');
+        return $response = $this->api->request('order/', $json, 'POST');
     }
     public function setStatus($order_id, $status_id): array
     {
-        return $response = $this->user->api('order/', ['order_id' => $order_id, 'status_id' => $status_id], 'POST');
+        return $response = $this->api->request('order/', ['order_id' => $order_id, 'status_id' => $status_id], 'POST');
     }
 }
