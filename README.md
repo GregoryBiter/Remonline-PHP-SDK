@@ -3,17 +3,20 @@ Remonline CRM SDK in PHP
 ## How to start?
 
 ```php 
-composer install
-php -S localhost:8080
+composer require gregorybiter/remonline-sdk
 ```
 ## How to use?
 ```php 
 require __DIR__ . '/vendor/autoload.php';
 
-use Gbit\Remonline\Models\Order;
+use Gbit\Remonline\RemonlineClient;
+use Gbit\Remonline\Order;
 
-$order = new Order("your api key");
-echo $order->filter(['sort_dir' => 'asc'])->get();
-echo $order->getCustomFields();
+$api = new RemonlineClient("api_key");
+
+$order = new Order($api);
+
+$orderRequest = $order->getOrders();
+
 ```
 
