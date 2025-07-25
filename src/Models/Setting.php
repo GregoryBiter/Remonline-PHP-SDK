@@ -23,7 +23,7 @@ class Setting extends Models
     }
 
     public function getAdCampaigns(){
-        return $this->api->getData('marketing/campaigns/', []);
+        return $this->response( $this->api->getData('marketing/campaigns/', []));
     }
     public function getPrices(){
         return $this->api->getData('margins/', []);
@@ -39,6 +39,11 @@ class Setting extends Models
 
     public function getOrderCustomFields(){
         return $this->api->request('orders/custom-fields', [], 'GET');
+    }
+
+    public function getBookList(): array
+    {
+        return $this->api->getData('book/list/', []);
     }
 
 
