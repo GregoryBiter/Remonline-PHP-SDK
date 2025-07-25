@@ -11,13 +11,20 @@ class Order extends Models
     private $map = [
 
     ];
+    /**
+     * Конструктор класса Order
+     *
+     * @param RemonlineClient $api Экземпляр клиента Remonline
+     */
     public function __construct(RemonlineClient $api)
     {
         parent::__construct($api);
     }
 
     /**
-     * Получить список всех возможных статусов, которые можно присвоить смете.
+     * Получить список всех возможных статусов, которые можно присвоить заказу.
+     *
+     * @return array Массив статусов заказа
      */
     public function getStatuses(): array
     {
@@ -25,154 +32,147 @@ class Order extends Models
     }
 
     /**
-     * Получить список всех смет.
+     * Получить список всех заказов.
      *
-     * @param array $arr Дополнительные параметры:
-     * - int $page Номер страницы (по умолчанию 1).
-     * - int[] $types Список идентификаторов типов смет (аналогично типам заказов).
-     * - int[] $branches Список идентификаторов локаций.
-     * - int[] $ids Список идентификаторов смет.
-     * - string[] $id_labels Массив номеров документов смет.
-     * - int[] $statuses Массив идентификаторов статусов смет.
-     * - int[] $managers Массив идентификаторов сотрудников.
-     * - int[] $clients_ids Список идентификаторов клиентов.
-     * - string[] $client_names Список имен клиентов.
-     * - string[] $client_phones Список номеров телефонов клиентов.
-     * - string[] $created_at Фильтр по дате создания (ISO 8601). Один элемент — начало диапазона, два элемента — диапазон.
-     * - string[] $modified_at Фильтр по дате изменения (ISO 8601). Один элемент — начало диапазона, два элемента — диапазон.
-     * - string[] $scheduled_for Фильтр по дате и времени "Запланировано на" (ISO 8601). Один элемент — начало диапазона, два элемента — диапазон.
-     * @param bool $getAllPage Если true, возвращает все страницы.
-     * @return array Ответ API.
+     * @param array $arr Дополнительные параметры фильтрации (см. документацию API)
+     * @param bool $getAllPage Если true, возвращает все страницы
+     * @return array Массив заказов
      */
     public function get(array $arr = [], bool $getAllPage = false): array
     {
+        // Добавляем параметры пагинации, если они установлены
+        $arr = $this->preparePaginationParams($arr);
+        
         return $this->response(
             $this->api->getData($this->endpoint, $arr, $getAllPage)
         );
     }
 
-    public function getById($order_id): array
+    /**
+     * Получить заказ по ID
+     *
+     * @param int $order_id Идентификатор заказа
+     * @return array Массив с данными заказа
+     */
+    public function getById(int $order_id): array
     {
         return $this->api->request("{$this->endpoint}/{$order_id}", [], 'GET');
     }
 
     /**
-     * Создать новую смету.
+     * Создать новый заказ.
      *
-     * @param array $data Данные для создания сметы. Обязательные и дополнительные параметры:
-     * - int $branch_id Идентификатор локации (обязательно).
-     * - int $order_type_id Идентификатор типа заказа (обязательно).
-     * - int $client_id Идентификатор клиента (обязательно).
-     * - string $name Название сметы.
-     * - string $description Описание сметы.
-     * - float $total Сумма сметы.
-     * - string $currency Валюта сметы (например, "USD").
-     * - string $created_at Дата создания сметы (ISO 8601).
-     * - string $due_date Дата завершения сметы (ISO 8601).
-     * - int[] $items Массив идентификаторов позиций, включённых в смету.
-     * - int[] $tags Массив идентификаторов тегов, связанных со сметой.
-     * @return array Ответ API.
-     * @throws \InvalidArgumentException Если обязательные параметры не указаны.
+     * @param array $data Данные для создания заказа. Поддерживаемые ключи:
+     * <ul>
+     *   <li>branch_id (int): Идентификатор локации (обязательно)</li>
+     *   <li>order_type_id (int): Идентификатор типа заказа (обязательно)</li>
+     *   <li>client_id (int): Идентификатор клиента (обязательно)</li>
+     *   <li>name (string): Название заказа</li>
+     *   <li>description (string): Описание заказа</li>
+     *   <li>total (float): Сумма заказа</li>
+     *   <li>currency (string): Валюта заказа</li>
+     *   <li>created_at (string): Дата создания (ISO 8601)</li>
+     *   <li>due_date (string): Дата завершения (ISO 8601)</li>
+     *   <li>items (int[]): Массив идентификаторов позиций</li>
+     *   <li>tags (int[]): Массив идентификаторов тегов</li>
+     * </ul>
+     * @return array Массив с данными созданного заказа
+     * @throws \InvalidArgumentException Если обязательные параметры не указаны
      */
     public function create(array $data = []): array
     {
-        // Используем универсальный метод из $this->api
         return $this->api->create($this->endpoint, $data, ['branch_id', 'order_type_id', 'client_id']);
     }
 
+    /**
+     * Обновить заказ по ID
+     *
+     * @param int $order_id Идентификатор заказа
+     * @param array $data Данные для обновления заказа. Поддерживаемые ключи аналогичны create()
+     * @return array Массив с обновлёнными данными заказа
+     */
     public function update(int $order_id, array $data): array
     {
         return $this->api->request("{$this->endpoint}/{$order_id}", array_merge(['order_id' => $order_id], $data), 'PATCH');
     }
 
     /**
-     * Получить список позиций в смете.
+     * Получить список позиций в заказе
      *
-     * @param int $estimate_id Идентификатор сметы.
-     * @return array Ответ API с позициями сметы.
+     * @param int $order_id Идентификатор заказа
+     * @return array Массив позиций заказа
      */
     public function getItems(int $order_id): array
     {
         return $this->api->request("{$this->endpoint}/{$order_id}/items", ['order_id' => $order_id], 'GET');
     }
+    /**
+     * Добавить позицию в заказ
+     *
+     * @param int $order_id Идентификатор заказа
+     * @param array $data Данные позиции. Поддерживаемые ключи:
+     * <ul>
+     *   <li>assignee_id (int): ID назначенного сотрудника</li>
+     *   <li>quantity (float): Количество</li>
+     *   <li>price (float): Цена за единицу</li>
+     *   <li>cost (float): Себестоимость единицы</li>
+     *   <li>discount (array|object): Скидка (объект или массив)</li>
+     *   <li>warranty (array|object): Гарантия (объект или массив)</li>
+     *   <li>tax_ids (int[]): Массив ID налогов</li>
+     *   <li>comment (string): Текст комментария</li>
+     * </ul>
+     * @return array Массив с результатом добавления
+     */
     public function addItem(int $order_id, array $data): array
     {
         return $this->api->request("{$this->endpoint}/{$order_id}/items", $data, 'POST');
     }
-    /*
-assignee_id
-int32
-Assigned Employee ID
-
-quantity
-float
-Quantity
-
-price
-float
-Price per unit
-
-cost
-float
-Unit cost
-
-discount
-object
-
-discount object
-warranty
-object
-
-warranty object
-tax_ids
-array of int32s
-Array of Tax ID
-
-
-ADD int32
-comment
-string
-Comment text
 */
+    /**
+     * Обновить позицию заказа
+     *
+     * @param int $order_id Идентификатор заказа
+     * @param int $item_id Идентификатор позиции
+     * @param array $data Данные для обновления позиции. Поддерживаемые ключи аналогичны addItem()
+     * @return array Массив с результатом обновления
+     */
     public function updateItem(int $order_id, int $item_id, array $data): array
     {
         return $this->api->request("{$this->endpoint}/{$order_id}/items/{$item_id}", $data, 'POST');
     }
 
     /**
-     * Summary of setStatus
-     * @param int $order_id
-     * @param int $status_id
-     * @param string $comment
-     * @return array
+     * Установить статус заказа
+     *
+     * @param int $order_id Идентификатор заказа
+     * @param int $status_id Идентификатор статуса
+     * @param string $comment Комментарий к смене статуса
+     * @return array Массив с результатом смены статуса
      */
     public function setStatus(int $order_id, int $status_id, string $comment): array
     {
         return $this->api->request("{$this->endpoint}/{$order_id}/status", ['status_id' => $status_id, 'comment' => $comment], 'POST');
     }
-    /*
-    Path Params
-    estimate_id
-    int32
-    required
-    Estimate ID
 
-    Body Params
-    comment
-    string
-    required
-    Comment
-
-    is_private
-    boolean
-    Defaults to false
-    Is this comment private?
-    */
+    /**
+     * Добавить комментарий к заказу
+     *
+     * @param int $order_id Идентификатор заказа
+     * @param string $comment Текст комментария
+     * @param bool $is_private Приватность комментария
+     * @return array Массив с результатом добавления комментария
+     */
     public function addComment(int $order_id, string $comment, bool $is_private): array
     {
         return $this->api->request("{$this->endpoint}/{$order_id}/comments", ['comment' => $comment, 'is_private'=>$is_private ], 'POST');
     }
 
+    /**
+     * Получить публичную ссылку на заказ
+     *
+     * @param int $order_id Идентификатор заказа
+     * @return array Массив с публичной ссылкой
+     */
     public function getPublicUrl(int $order_id): array
     {
         return $this->api->request("{$this->endpoint}/{$order_id}/public_url", [], 'GET');

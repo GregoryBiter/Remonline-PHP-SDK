@@ -20,7 +20,7 @@ class Product extends Models
 
     public function getProductsbyID(int $product_id): array
     {
-        return $this->api->getData('products/'. $product_id, [], true);
+        return $this->api->getData('products/' . $product_id, [], true);
     }
     public function getProductCategoryes(): array
     {

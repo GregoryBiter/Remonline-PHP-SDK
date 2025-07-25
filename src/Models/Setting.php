@@ -16,28 +16,34 @@ class Setting extends Models
         return $this->api->getData('settings/company', []);
     }
 
-    public function getLocations(){
+    public function getLocations(): array
+    {
         return $this->response(
             $this->api->getData('branches/', [])
         );
     }
 
-    public function getAdCampaigns(){
-        return $this->response( $this->api->getData('marketing/campaigns/', []));
+    public function getAdCampaigns(): array
+    {
+        return $this->response($this->api->getData('marketing/campaigns/', []));
     }
-    public function getPrices(){
+    public function getPrices(): array
+    {
         return $this->api->getData('margins/', []);
     }
 
-    public function getEmployees(){
+    public function getEmployees(): array
+    {
         return $this->api->getData('employees/', []);
     }
 
-    public function getOrderTypes(){
+    public function getOrderTypes(): array
+    {
         return $this->api->request('orders/types', [], 'GET');
     }
 
-    public function getOrderCustomFields(){
+    public function getOrderCustomFields(): array
+    {
         return $this->api->request('orders/custom-fields', [], 'GET');
     }
 

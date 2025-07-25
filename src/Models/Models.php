@@ -13,6 +13,8 @@ abstract class Models
     protected $meta = [];
 
     protected $page = null;
+    protected $pageSize = null;
+    protected $offset = null;
 
     public function __construct(RemonlineClient $api)
     {
@@ -58,7 +60,11 @@ abstract class Models
 
     protected function response($response): array
     {
+        // Сбрасываем параметры пагинации после получения ответа
         $this->page = null;
+        $this->pageSize = null;
+        $this->offset = null;
+        
         if (isset($response['count'])) {
             $this->meta['count'] = $response['count'];
         }
@@ -92,10 +98,74 @@ abstract class Models
         return $this->meta;
     }
 
-    public function page($page)
+    /**
+     * Установить номер страницы для пагинации
+     * 
+     * @param int $page Номер страницы (начиная с 1)
+     * @return $this
+     */
+    public function page(int $page): self
     {
         $this->page = $page;
         return $this;
+    }
+
+    /**
+     * Установить размер страницы для пагинации
+     * 
+     * @param int $size Количество элементов на странице
+     * @return $this
+     */
+    public function pageSize(int $size): self
+    {
+        $this->pageSize = $size;
+        return $this;
+    }
+
+    /**
+     * Установить смещение для пагинации
+     * 
+     * @param int $offset Смещение от начала
+     * @return $this
+     */
+    public function offset(int $offset): self
+    {
+        $this->offset = $offset;
+        return $this;
+    }
+
+    /**
+     * Установить лимит элементов (алиас для pageSize)
+     * 
+     * @param int $limit Максимальное количество элементов
+     * @return $this
+     */
+    public function limit(int $limit): self
+    {
+        return $this->pageSize($limit);
+    }
+
+    /**
+     * Подготовить параметры пагинации для запроса
+     * 
+     * @param array $params Существующие параметры запроса
+     * @return array Параметры с добавленной пагинацией
+     */
+    protected function preparePaginationParams(array $params = []): array
+    {
+        if ($this->page !== null) {
+            $params['page'] = $this->page;
+        }
+        
+        if ($this->pageSize !== null) {
+            $params['page_size'] = $this->pageSize;
+        }
+        
+        if ($this->offset !== null) {
+            $params['offset'] = $this->offset;
+        }
+        
+        return $params;
     }
 
     /**

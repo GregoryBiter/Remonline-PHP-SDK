@@ -16,10 +16,10 @@ class Cashbox extends Models
         return $this->api->getData('cashbox/', []);
     }
 
-    public function getCashboxTransactions(int $cashbox_id, array $filter_data = [], bool $getAllPage)  : array
+    public function getCashboxTransactions(int $cashbox_id, array $filter_data = [], bool $getAllPage): array
     {
         $endpoint = 'cashbox/report/' . $cashbox_id;
-        return $this->api->getData($endpoint,  $filter_data, $getAllPage);
+        return $this->api->getData($endpoint, $filter_data, $getAllPage);
     }
     
     public function getCashflowItems(): array
@@ -27,7 +27,7 @@ class Cashbox extends Models
         return $this->api->getData('cashflowitems/', []);
     }
 
-    public function createPayment($data = []): array
+    public function createPayment(array $data = []): array
     {
         return $this->api->request('cashbox/payment/', $data, 'POST');
     }

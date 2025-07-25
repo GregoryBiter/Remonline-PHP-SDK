@@ -12,7 +12,7 @@ class Warehouse extends Models
         parent::__construct($api);
     }
 
-    public function get($branch_id = null, bool $getAllPage = false): array
+    public function get(?int $branch_id = null, bool $getAllPage = false): array
     {
         return $this->api->getData('warehouse/', ['branch_id' => $branch_id], $getAllPage);
     }
@@ -27,7 +27,7 @@ class Warehouse extends Models
      * @return type
      * @throws conditon
      **/
-    public function goods($warehouse_id, $categories = [], $exclude_zero_residue = false, int $page = null, bool $getAllPage = false): array
+    public function goods(int $warehouse_id, array $categories = [], bool $exclude_zero_residue = false, ?int $page = null, bool $getAllPage = false): array
     {
         return $this->api->getData(
             'warehouse/goods/' . $warehouse_id,
