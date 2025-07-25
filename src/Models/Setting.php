@@ -32,9 +32,7 @@ class Setting extends Models
     }
 
     public function getOrderTypes(){
-        $this->response(
-            $this->api->getData('orders/types/', [])
-        );
+        return $this->api->request('orders/types', [], 'GET');
     }
 
 
