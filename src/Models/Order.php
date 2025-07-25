@@ -5,30 +5,13 @@ namespace Gbit\Remonline\Models;
 use Gbit\Remonline\RemonlineClient;
 
 class Order extends Models
-{
+{   
     private $map = [
-        'sort_dir' => '',
-        'types' => '',
-        'branches' => '',
-        'brands' => '',
-        'ids' => '',
-        'id_labels[]' => '',
-        'statuses' => '',
-        'managers' => '',
-        'engineers' => '',
-        'clients_ids' => '',
-        'client_names' => '',
-        'client_phones' => '',
-        'created_at' => '',
-        'done_at' => '',
-        'modified_at' => '',
-        'closed_at' => ''
     ];
     public function __construct(RemonlineClient $api)
     {
         parent::__construct($api);
     }
-    
 
     public function getOrder(array $arr = [], bool $getAllPage = false): array
     {
