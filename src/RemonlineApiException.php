@@ -107,13 +107,13 @@ class RemonlineApiException extends Exception
     }
 
     /**
-     * Check if this is a validation error (HTTP 422)
+     * Check if this is a validation error (HTTP 400 or 422)
      *
      * @return bool
      */
     public function isValidationError(): bool
     {
-        return $this->httpCode === 422;
+        return $this->httpCode === 422 || $this->httpCode === 400;
     }
 
     /**
@@ -164,6 +164,11 @@ class RemonlineApiException extends Exception
     public function getUserFriendlyMessage(): string
     {
         switch ($this->httpCode) {
+            case 400:
+                if ($this->isValidationError()) {
+                    return $this->getValidationErrorsMessage();
+                }
+                return 'Неправильный запрос к API';
             case 401:
                 return 'Неверный API ключ или токен доступа';
             case 403:
@@ -171,7 +176,7 @@ class RemonlineApiException extends Exception
             case 404:
                 return 'Запрашиваемый ресурс не найден';
             case 422:
-                return 'Ошибка валидации данных';
+                return $this->getValidationErrorsMessage();
             case 429:
                 return 'Превышен лимит запросов к API';
             case 500:
@@ -179,5 +184,144 @@ class RemonlineApiException extends Exception
             default:
                 return $this->getMessage();
         }
+    }
+
+    /**
+     * Get validation errors in a readable format
+     *
+     * @return string
+     */
+    public function getValidationErrorsMessage(): string
+    {
+        if (!$this->hasValidationErrors()) {
+            return $this->getMessage();
+        }
+
+        $validationErrors = $this->getValidationErrors();
+        $messages = [];
+
+        foreach ($validationErrors as $field => $errors) {
+            if (is_array($errors)) {
+                foreach ($errors as $error) {
+                    $messages[] = $this->formatFieldError($field, $error);
+                }
+            } else {
+                $messages[] = $this->formatFieldError($field, $errors);
+            }
+        }
+
+        return 'Ошибки валидации: ' . implode('; ', $messages);
+    }
+
+    /**
+     * Check if the exception contains validation errors
+     *
+     * @return bool
+     */
+    public function hasValidationErrors(): bool
+    {
+        return isset($this->errorDetails['message']['validation']) ||
+               isset($this->errorDetails['validation']) ||
+               isset($this->errorDetails['errors']);
+    }
+
+    /**
+     * Get validation errors array
+     *
+     * @return array
+     */
+    public function getValidationErrors(): array
+    {
+        // RemOnline API может возвращать ошибки в разных форматах
+        if (isset($this->errorDetails['message']['validation'])) {
+            return $this->errorDetails['message']['validation'];
+        }
+
+        if (isset($this->errorDetails['validation'])) {
+            return $this->errorDetails['validation'];
+        }
+
+        if (isset($this->errorDetails['errors'])) {
+            return $this->errorDetails['errors'];
+        }
+
+        return [];
+    }
+
+    /**
+     * Get specific field validation errors
+     *
+     * @param string $field
+     * @return array
+     */
+    public function getFieldErrors(string $field): array
+    {
+        $validationErrors = $this->getValidationErrors();
+        
+        if (isset($validationErrors[$field])) {
+            return is_array($validationErrors[$field]) ? $validationErrors[$field] : [$validationErrors[$field]];
+        }
+
+        return [];
+    }
+
+    /**
+     * Check if a specific field has validation errors
+     *
+     * @param string $field
+     * @return bool
+     */
+    public function hasFieldError(string $field): bool
+    {
+        return !empty($this->getFieldErrors($field));
+    }
+
+    /**
+     * Get all validation errors as a flat array
+     *
+     * @return array
+     */
+    public function getAllValidationMessages(): array
+    {
+        $validationErrors = $this->getValidationErrors();
+        $messages = [];
+
+        foreach ($validationErrors as $field => $errors) {
+            if (is_array($errors)) {
+                foreach ($errors as $error) {
+                    $messages[] = $this->formatFieldError($field, $error);
+                }
+            } else {
+                $messages[] = $this->formatFieldError($field, $errors);
+            }
+        }
+
+        return $messages;
+    }
+
+    /**
+     * Format field error message
+     *
+     * @param string $field
+     * @param string $error
+     * @return string
+     */
+    private function formatFieldError(string $field, string $error): string
+    {
+        // Переводим некоторые названия полей на русский
+        $fieldTranslations = [
+            'will_done_at' => 'Дата выполнения',
+            'malfunction' => 'Неисправность',
+            'ad_campaign_id' => 'Рекламная кампания',
+            'contact_name' => 'Имя контакта',
+            'contact_phone' => 'Телефон контакта',
+            'description' => 'Описание',
+            'client_id' => 'ID клиента',
+            'leadtype_id' => 'Тип лида',
+            'branch_id' => 'Филиал',
+        ];
+
+        $fieldName = $fieldTranslations[$field] ?? $field;
+        return $fieldName . ': ' . $error;
     }
 }
