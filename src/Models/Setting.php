@@ -31,5 +31,11 @@ class Setting extends Models
         return $this->api->getData('employees/', []);
     }
 
+    public function getOrderTypes(){
+        $this->response(
+            $this->api->getData('orders/types/', [])
+        );
+    }
+
 
 }
