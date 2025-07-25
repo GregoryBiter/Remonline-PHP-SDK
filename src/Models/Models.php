@@ -10,6 +10,9 @@ abstract class Models
     private $map = [];
 
     protected $data = [];
+    protected $meta = [];
+
+    protected $page = null;
 
     public function __construct(RemonlineClient $api)
     {
@@ -51,6 +54,48 @@ abstract class Models
                 $this->data[$this->map[$key]] = $value;
             }
         }
+    }
+
+    protected function response($response): array
+    {
+        $this->page = null;
+        if (isset($response['count'])) {
+            $this->meta['count'] = $response['count'];
+        }
+        if (isset($response['page'])) {
+            $this->meta['page'] = $response['page'];
+        }
+        if (isset($response['page_size'])) {
+            $this->meta['page_size'] = $response['page_size'];
+        }
+        if (isset($response['total_pages'])) {
+            $this->meta['total_pages'] = $response['total_pages'];
+        }
+        if (isset($response['data'])) {
+           
+            $this->data = $response['data'];
+            return $response['data'];
+        }
+        return $response;
+    }
+
+    /*
+    [count] => 13266
+    [page] => 1
+    [page_size] => 50
+    [total_pages] => 266*/
+    public function meta($key = null)
+    {
+        if ($key) {
+            return $this->meta[$key];
+        }
+        return $this->meta;
+    }
+
+    public function page($page)
+    {
+        $this->page = $page;
+        return $this;
     }
 
 }
