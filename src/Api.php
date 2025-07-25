@@ -26,16 +26,14 @@ class Api
      * @param string $type HTTP method (GET, POST, PATCH, DELETE)
      * @param string|null $model Optional model name to add to response
      * @return array API response
-     * @throws Exception On request failure, invalid API key, or rate limiting
+     * @throws RemonlineApiException On request failure, invalid API key, rate limiting, or JSON parsing errors
      */
     public function api(string $url, array $params = [], string $type = 'GET', string $model = null): array
     {
         $fullUrl = self::APIURL . ltrim($url, '/');
         
         // Initialize cURL
-        $ch = curl_init();
-        
-        // Prepare headers
+        $ch = curl_init();        // Prepare headers
         $headers = [
             'Authorization: Bearer ' . $this->apiKey,
             'Accept: application/json',
@@ -99,28 +97,100 @@ class Api
         
         // Check for cURL errors
         if ($response === false) {
-            $error = curl_error($ch);
+            $curlError = curl_error($ch);
+            $curlErrno = curl_errno($ch);
             curl_close($ch);
-            $this->push_logs('cURL Error: ' . $error, true);
-            throw new Exception('API request failed: ' . $error);
+            
+            $logData = [
+                'curl_error' => $curlError,
+                'curl_errno' => $curlErrno,
+                'url' => $fullUrl,
+                'method' => $type,
+                'params' => $params
+            ];
+            
+            $this->push_logs('cURL Error: ' . json_encode($logData, JSON_UNESCAPED_UNICODE), true);
+            
+            throw new RemonlineApiException(
+                'API request failed: ' . $curlError,
+                0,
+                ['curl_error' => $curlError, 'curl_errno' => $curlErrno],
+                $fullUrl,
+                $params
+            );
         }
         
         // Get HTTP status code
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         
-        // Check for HTTP errors
-        if ($httpCode >= 400) {
-            $this->push_logs('HTTP Error: Status code ' . $httpCode . ', Response: ' . $response, true);
-            throw new Exception('API request failed with HTTP status: ' . $httpCode);
-        }
-        
-        // Parse JSON response
+        // Parse JSON response first to get error details
         $responseBody = json_decode($response, true);
         
+        // Check for HTTP errors
+        if ($httpCode >= 400) {
+            $errorMessage = 'API request failed with HTTP status: ' . $httpCode;
+            $errorDetails = [];
+            
+            // Try to extract error details from JSON response
+            if (json_last_error() === JSON_ERROR_NONE && is_array($responseBody)) {
+                // Common error fields in APIs
+                $errorFields = ['error', 'message', 'error_description', 'errors', 'detail', 'details'];
+                
+                foreach ($errorFields as $field) {
+                    if (isset($responseBody[$field])) {
+                        $errorDetails[$field] = $responseBody[$field];
+                    }
+                }
+                
+                // If we found error details, include them in the exception
+                if (!empty($errorDetails)) {
+                    $errorMessage .= '. Error details: ' . json_encode($errorDetails, JSON_UNESCAPED_UNICODE);
+                }
+            }
+            
+            // Log the full error information
+            $logData = [
+                'http_code' => $httpCode,
+                'url' => $fullUrl,
+                'method' => $type,
+                'request_params' => $params,
+                'response' => $response,
+                'error_details' => $errorDetails
+            ];
+            
+            $this->push_logs('HTTP Error: ' . json_encode($logData, JSON_UNESCAPED_UNICODE), true);
+            
+            // Create custom exception with error details
+            throw new RemonlineApiException(
+                $errorMessage,
+                $httpCode,
+                $errorDetails,
+                $fullUrl,
+                $params
+            );
+        }
+        
+        // Check for JSON parsing errors only for successful responses
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->push_logs('JSON Error: ' . json_last_error_msg() . ', Response: ' . $response, true);
-            throw new Exception('Invalid JSON response: ' . json_last_error_msg());
+            $jsonError = 'Invalid JSON response: ' . json_last_error_msg();
+            $logData = [
+                'json_error' => json_last_error_msg(),
+                'json_error_code' => json_last_error(),
+                'response' => $response,
+                'url' => $fullUrl,
+                'method' => $type
+            ];
+            
+            $this->push_logs('JSON Error: ' . json_encode($logData, JSON_UNESCAPED_UNICODE), true);
+            
+            throw new RemonlineApiException(
+                $jsonError,
+                0,
+                ['json_error' => json_last_error_msg(), 'json_error_code' => json_last_error()],
+                $fullUrl,
+                $params
+            );
         }
         
         if ($model) {

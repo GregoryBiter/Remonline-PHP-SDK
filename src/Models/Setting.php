@@ -17,7 +17,9 @@ class Setting extends Models
     }
 
     public function getLocations(){
-        return $this->api->getData('branches/', []);
+        return $this->response(
+            $this->api->getData('branches/', [])
+        );
     }
 
     public function getAdCampaigns(){
@@ -33,6 +35,10 @@ class Setting extends Models
 
     public function getOrderTypes(){
         return $this->api->request('orders/types', [], 'GET');
+    }
+
+    public function getOrderCustomFields(){
+        return $this->api->request('orders/custom-fields', [], 'GET');
     }
 
 

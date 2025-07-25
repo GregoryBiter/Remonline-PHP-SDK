@@ -27,17 +27,83 @@ class RemonlineClient
     }
 
     /**
-     * Make API request
+     * Make API request with enhanced error handling
      * 
      * @param string $url
      * @param array $params
      * @param string $type
      * @param string $model
      * @return array
+     * @throws RemonlineApiException On API errors
      */
     public function request(string $url, array $params, string $type, string $model = ''): array
     {
-        return $this->api->api($url, $params, $type, $model);
+        try {
+            return $this->api->api($url, $params, $type, $model);
+        } catch (RemonlineApiException $e) {
+            // Log the error with additional context
+            $this->pushLogs([
+                'error_type' => 'RemonlineApiException',
+                'message' => $e->getMessage(),
+                'http_code' => $e->getHttpCode(),
+                'error_details' => $e->getErrorDetails(),
+                'api_url' => $e->getApiUrl(),
+                'request_data' => $e->getRequestData(),
+                'user_friendly_message' => $e->getUserFriendlyMessage()
+            ], true);
+            
+            // Re-throw the exception for the calling code to handle
+            throw $e;
+        }
+    }
+
+    /**
+     * Make API request with automatic retry on rate limit errors
+     * 
+     * @param string $url
+     * @param array $params
+     * @param string $type
+     * @param string $model
+     * @param int $maxRetries Maximum number of retries for rate limit errors
+     * @param int $retryDelay Delay in seconds between retries
+     * @return array
+     * @throws RemonlineApiException On API errors
+     */
+    public function requestWithRetry(
+        string $url, 
+        array $params, 
+        string $type, 
+        string $model = '', 
+        int $maxRetries = 3, 
+        int $retryDelay = 1
+    ): array {
+        $attempt = 0;
+        
+        while ($attempt <= $maxRetries) {
+            try {
+                return $this->request($url, $params, $type, $model);
+            } catch (RemonlineApiException $e) {
+                if ($e->isRateLimitError() && $attempt < $maxRetries) {
+                    $attempt++;
+                    $delay = $retryDelay * $attempt; // Exponential backoff
+                    
+                    $this->pushLogs([
+                        'message' => 'Rate limit hit, retrying in ' . $delay . ' seconds',
+                        'attempt' => $attempt,
+                        'max_retries' => $maxRetries
+                    ]);
+                    
+                    sleep($delay);
+                    continue;
+                }
+                
+                // If it's not a rate limit error or we've exhausted retries, re-throw
+                throw $e;
+            }
+        }
+        
+        // This should never be reached, but just in case
+        throw new RemonlineApiException('Maximum retry attempts exceeded');
     }
 
     /**
