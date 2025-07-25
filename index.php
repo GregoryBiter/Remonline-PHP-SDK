@@ -1,15 +1,15 @@
 <?php
 require __DIR__ . '/vendor/autoload.php';
 
-use Gbit\Remonline\Api;
-use Gbit\Remonline\Models\Order;
+use Gbit\Remonline\RemonlineClient;
+use Gbit\Remonline\Models\Organization;
 
-$api = new Api("your api key");
-$Order = new Order($api);
-$echo['Order'] = $Order->page(1)->get();
-$echo['CustomFields']  = $Order->getCustomFields();
-echo json_encode($echo);
+$api = new RemonlineClient("1830884e0176463b802684a7cef4ccaf");
+$organization = new Organization($api);
+$result = $organization->get(); // Example method call, adjust as needed
+
 ?>
 <pre>
-
+<?php print_r($result); ?>
+<?php print_r($organization->meta()); // Example to show meta data if available ?>
 </pre>

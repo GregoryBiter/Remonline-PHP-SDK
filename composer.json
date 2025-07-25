@@ -3,7 +3,9 @@
     "description": "sdk viber bot rest",
     "type": "library",
     "require": {
-        "monolog/monolog": "*"
+        "php": ">=7.4",
+        "monolog/monolog": "*",
+        "guzzlehttp/guzzle": "^7.0"
     },
     "license": "MIT",
     "autoload": {
