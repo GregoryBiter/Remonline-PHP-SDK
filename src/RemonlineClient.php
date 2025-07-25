@@ -2,183 +2,120 @@
 
 namespace Gbit\Remonline;
 
-use DateTime;
 use Exception;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 
+/**
+ * RemonlineClient - High-level client for RemOnline API
+ * 
+ * This client provides convenient methods for common operations
+ * and uses the updated Bearer Token authentication.
+ */
 class RemonlineClient
 {
     const POST = 'POST';
     const GET = 'GET';
     const PUT = 'PUT';
-    protected $apiKey;
-    protected $tokenInfo = [];
-    protected const APIURL = 'https://api.remonline.app/';
-    public function __construct($apiKey)
-    {
-        $this->apiKey = $apiKey;
-        $this->tokenInfo['token'] = NULL;
-    }
+
+    protected $api;
+
     /**
-     * @param string $apiKey key api Remonlie
+     * @param string $apiKey API key from RemOnline Settings > API section
      */
-    public function getToken($apiKey = null): void
+    public function __construct(string $apiKey)
     {
-        if ($apiKey === null) {
-            $apiKey = $this->apiKey;
-        }
-
-        $url = self::APIURL . 'token/new';
-        $data = [
-            'api_key' => $apiKey,
-        ];
-        $headers = [
-            'Content-Type: application/json',
-        ];
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
-        $response = json_decode(curl_exec($ch), true);
-        $error = curl_error($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($error) {
-            throw new Exception('Failed to make API request: ' . $error);
-        }
-
-        if ($httpCode !== 200 || !$response['success']) {
-            throw new Exception('Failed to get token: ' . $response['message']);
-        }
-
-        $this->tokenInfo = [
-            'token' => $response['token'],
-            'ts' => time(),
-        ];
-    }
-    /**
-     * @param string $url pass url
-     */
-    private function checkToken($url): void
-    {
-        if ($url !== 'token/new') {
-            if (!isset($this->tokenInfo['token'])
-                || $this->tokenInfo['token'] === null
-                || time() - $this->tokenInfo['ts'] >= 580) {
-                $this->getToken();
-            }
-        }
-    }
-    /**
-     * @param array $params the query parameters
-     * @return string url query to Remonline
-     */
-    
-    private function toUrl($params)
-    {
-        $urlParams = '';
-
-        if (!empty($params) && is_array($params)) {
-            foreach ($params as $key => $value) {
-                if (is_numeric($value)) {
-                    $urlParams .= '&' . $key . '=' . strval($value);
-                } elseif (is_array($value)) {
-                    foreach ($value as $subKey => $subValue) {
-                        $urlParams .= '&' . $key . '=' . strval($subValue);
-                    }
-                }
-            }
-        }
-
-        return $urlParams;
+        $this->api = new Api($apiKey);
     }
 
     /**
+     * Make API request
+     * 
      * @param string $url
      * @param array $params
      * @param string $type
-     * @param string|null $model
+     * @param string $model
      * @return array
      */
     public function request(string $url, array $params, string $type, string $model = ''): array
     {
-        $this->checkToken($url);
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $headers = [
-            'Content-Type: application/json'
-        ];
-
-        if ($type === "GET") {
-            $queryString = http_build_query(["token" => $this->tokenInfo['token']]) . $this->toUrl($params);
-            curl_setopt($ch, CURLOPT_URL, self::APIURL . $url . '?' . $queryString);
-        } else if ($type === "POST") {
-            $requestData = ["token" => $this->tokenInfo['token']] + $params;
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_URL, self::APIURL . $url);
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestData));
-        }
-        $request = json_decode(curl_exec($ch), true);
-        if (curl_error($ch)) {
-            $this->pushLogs(curl_error($ch), true);
-            throw new Exception('Request failed');
-        } else if (!isset($request['success']) || $request['success'] === false) {
-            $this->pushLogs($request, true);
-            throw new Exception('Remonline failed: ' . json_encode($request));
-        } else {
-            if ($model) {
-                $request['model'] = $model;
-            }
-
-            return $request;
-        }
+        return $this->api->api($url, $params, $type, $model);
     }
 
+    /**
+     * Универсальный метод для создания сущностей.
+     *
+     * @param string $url URL для запроса.
+     * @param array $data Данные для запроса.
+     * @param array $requiredFields Список обязательных полей.
+     * @return array Ответ API.
+     * @throws \InvalidArgumentException Если обязательные поля отсутствуют.
+     */
+    public function create(string $url, array $data, array $requiredFields = []): array
+    {
+        // Проверка обязательных полей
+        foreach ($requiredFields as $field) {
+            if (empty($data[$field])) {
+                throw new \InvalidArgumentException("Поле {$field} является обязательным.");
+            }
+        }
 
-
-    public function getData($endpoint, $arr = [], $getAllPage = false)
+        // Выполнение POST-запроса
+        return $this->request($url, $data, 'POST');
+    }
+    /**
+     * Get data from endpoint with optional pagination
+     * 
+     * @param string $endpoint API endpoint
+     * @param array $arr Additional parameters
+     * @param bool $getAllPage Whether to fetch all pages automatically
+     * @return array
+     */
+    public function getData(string $endpoint, array $arr = [], bool $getAllPage = false): array
     {
         $out = [];
         $data = $this->request($endpoint, array_merge($arr), 'GET');
-        $out['data'] = $data['data'];
-        if ($getAllPage) {
-            $countPage = $data['count'] / 50;
-            if ($data['count'] % 50 > 0) {
-                $countPage++;
-            }
-            
-            for ($i = 1; $i <= $countPage; $i++) {
+
+        // Handle different response formats - new API might not have 'data' wrapper
+        if (isset($data['data'])) {
+            $out['data'] = $data['data'];
+            $out['count'] = $data['count'] ?? count($data['data']);
+        } else {
+            // If no 'data' wrapper, assume the whole response is the data
+            $out['data'] = $data;
+            $out['count'] = count($data);
+        }
+
+        if ($getAllPage && isset($data['count']) && $data['count'] > 50) {
+            $countPage = ceil($data['count'] / 50);
+
+            for ($i = 2; $i <= $countPage; $i++) {
                 $response = $this->request($endpoint, array_merge($arr, ['page' => $i]), 'GET');
-                $out['data'] = array_merge($out['data'], $response['data']);
+                $responseData = isset($response['data']) ? $response['data'] : $response;
+                $out['data'] = array_merge($out['data'], $responseData);
             }
         }
-        $out['count'] = $data['count'];
+
         return $out;
+    }
+
+    /**
+     * Get API client instance
+     * 
+     * @return Api
+     */
+    public function getApiClient(): Api
+    {
+        return $this->api;
     }
 
 
     /**
-     * @param $text Message error
-     * @param $error Boolean error/warning
-     * @return none
-     * @throws
-     **/
-    public static function pushLogs($text, $error = false): void
+     * @param mixed $text Message error
+     * @param bool $error Boolean error/warning
+     * @return void
+     */
+    public static function pushLogs($text, bool $error = false): void
     {
-
-        $log = new Logger('debug');
-        $log->pushHandler(new StreamHandler('logs/error.log'));
-        if (!$error) {
-            $log->warning(json_encode($text));
-        } else {
-            $log->error(json_encode($text));
-        }
+        // Delegate to Api class for consistent logging
+        Api::push_logs($text, $error);
     }
 }
