@@ -28,7 +28,7 @@ class Order extends Models
      */
     public function getStatuses(): array
     {
-        return $this->api->getData('statuses/estimates', [], true);
+        return $this->api->getData('statuses/'.$this->endpoint, [], true);
     }
 
     /**
@@ -127,7 +127,7 @@ class Order extends Models
     {
         return $this->api->request("{$this->endpoint}/{$order_id}/items", $data, 'POST');
     }
-*/
+
     /**
      * Обновить позицию заказа
      *
