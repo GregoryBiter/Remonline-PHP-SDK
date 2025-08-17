@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  php:
+    image: php:7.4-cli
+    container_name: remonline-php
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: tail -f /dev/null
+    tty: true
+    environment:
+      - COMPOSER_ALLOW_SUPERUSER=1
+    depends_on: []
+  composer:
+    image: composer:2.2
+    container_name: remonline-composer
+    working_dir: /app
+    volumes:
+      - ./:/app
+    entrypoint: ["composer"]
+    depends_on:
+      - php
