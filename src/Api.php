@@ -1,7 +1,5 @@
 <?php
 namespace Gbit\Remonline;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
 use \Exception;
 
 class Api
@@ -205,14 +203,24 @@ class Api
      * @param bool $error Boolean error/warning
      * @return void
      */
+    /**
+     * Записывает лог в файл logs/error.log вручную.
+     *
+     * @param mixed $text Сообщение или данные для лога
+     * @param bool $error true - ошибка, false - предупреждение
+     * @return void
+     */
     public static function push_logs($text, bool $error = false): void
     {
-        $log = new Logger('debug');
-        $log->pushHandler(new StreamHandler('logs/error.log'));
-        if (!$error) {
-            $log->warning(json_encode($text));
-        } else {
-            $log->error(json_encode($text));
+        $logDir = __DIR__ . '/../logs';
+        $logFile = $logDir . '/error.log';
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0777, true);
         }
+        $date = date('Y-m-d H:i:s');
+        $type = $error ? 'ERROR' : 'WARNING';
+        $message = is_string($text) ? $text : json_encode($text, JSON_UNESCAPED_UNICODE);
+        $logLine = "[$date] [$type] $message\n";
+        file_put_contents($logFile, $logLine, FILE_APPEND | LOCK_EX);
     }
 }
