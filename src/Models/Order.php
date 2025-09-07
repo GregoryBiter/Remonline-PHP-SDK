@@ -28,24 +28,18 @@ class Order extends Models
      */
     public function getStatuses(): array
     {
-        return $this->api->getData('statuses/'.$this->endpoint, [], true);
+        return $this->api->request('statuses/'.$this->endpoint, [], 'GET');
     }
 
     /**
      * Получить список всех заказов.
      *
      * @param array $arr Дополнительные параметры фильтрации (см. документацию API)
-     * @param bool $getAllPage Если true, возвращает все страницы
      * @return array Массив заказов
      */
-    public function get(array $arr = [], bool $getAllPage = false): array
+    public function get(array $arr = []): array
     {
-        // Добавляем параметры пагинации, если они установлены
-        $arr = $this->preparePaginationParams($arr);
-        
-        return $this->response(
-            $this->api->getData($this->endpoint, $arr, $getAllPage)
-        );
+        return $this->api->request($this->endpoint, $arr, 'GET');
     }
 
     /**
@@ -81,7 +75,7 @@ class Order extends Models
      */
     public function create(array $data = []): array
     {
-        return $this->api->create($this->endpoint, $data, ['branch_id', 'order_type_id', 'client_id']);
+        return $this->api->request($this->endpoint, $data, 'POST');
     }
 
     /**

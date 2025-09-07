@@ -6,37 +6,23 @@ use Gbit\Remonline\RemonlineClient;
 
 class People extends Models
 {
-
-   
-    private $map = [
-    ];
-
     private $endpoint = 'contacts/people';
+
     public function __construct(RemonlineClient $api)
     {
         parent::__construct($api);
     }
 
-    public function get(array $arr = [], bool $getAllPage = false): array
+    public function get(array $arr = []): array
     {
-        return $this->response(
-            $this->api->request($this->endpoint, $arr, 'GET')
-        );
+        return $this->api->request($this->endpoint, $arr, 'GET');
     }
 
     public function getByID(int $person_id): array
     {
-        return $this->response(
-            $this->api->request($this->endpoint . '/' . $person_id, [], 'GET')
-        );
+        return $this->api->request($this->endpoint . '/' . $person_id, [], 'GET');
     }
 
-    /**
-     * Получить организацию по ID человека.
-     *
-     * @param int $person_id Идентификатор человека.
-     * @return array Ответ API с информацией об организации.
-     */
     public function getOrganization(int $person_id): array
     {
         return $this->api->request($this->endpoint . '/' . $person_id . '/organization', [], 'GET');
@@ -44,7 +30,7 @@ class People extends Models
 
     public function create(array $data = []): array
     {
-        return $this->api->create($this->endpoint, $data, ['first_name']);
+        return $this->api->request($this->endpoint, $data, 'POST');
     }
 
     public function update(int $person_id, array $data): array
@@ -56,6 +42,7 @@ class People extends Models
     {
         return $this->api->request($this->endpoint . '/' . $person_id, [], 'DELETE');
     }
+
     public function addComment(int $person_id, string $comment): array
     {
         return $this->api->request($this->endpoint . '/' . $person_id . '/comments', ['comment' => $comment], 'POST');
@@ -63,10 +50,6 @@ class People extends Models
 
     public function merge(int $person_id, array $ids): array
     {
-        if (empty($ids)) {
-            throw new \InvalidArgumentException('Массив ids не может быть пустым.');
-        }
         return $this->api->request($this->endpoint . '/' . $person_id . '/merge', ['ids' => $ids], 'POST');
     }
-
 }

@@ -6,24 +6,40 @@ use Gbit\Remonline\RemonlineClient;
 
 class Product extends Models
 {
+    private $endpoint = 'products';
 
     public function __construct(RemonlineClient $api)
     {
         parent::__construct($api);
     }
-    
 
-    public function getProducts(array $arr = [], bool $getAllPage = false): array
+    public function get(array $arr = []): array
     {
-        return $this->api->getData('products/', $arr, $getAllPage);
+        return $this->api->request($this->endpoint, $arr, 'GET');
     }
 
-    public function getProductsbyID(int $product_id): array
+    public function getByID(int $product_id): array
     {
-        return $this->api->getData('products/' . $product_id, [], true);
+        return $this->api->request($this->endpoint . '/' . $product_id, [], 'GET');
     }
-    public function getProductCategoryes(): array
+
+    public function getCategories(): array
     {
-        return $this->api->getData('warehouse/categories/', [], true);
+        return $this->api->request('warehouse/categories', [], 'GET');
+    }
+
+    public function create(array $data = []): array
+    {
+        return $this->api->request($this->endpoint, $data, 'POST');
+    }
+
+    public function update(int $product_id, array $data): array
+    {
+        return $this->api->request($this->endpoint . '/' . $product_id, $data, 'PATCH');
+    }
+
+    public function delete(int $product_id): array
+    {
+        return $this->api->request($this->endpoint . '/' . $product_id, [], 'DELETE');
     }
 }

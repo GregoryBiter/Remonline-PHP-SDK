@@ -6,29 +6,30 @@ use Gbit\Remonline\RemonlineClient;
 
 class Cashbox extends Models
 {
+    private $endpoint = 'cashbox';
+
     public function __construct(RemonlineClient $api)
     {
         parent::__construct($api);
     }
     
-    public function getCashbox(): array
+    public function get(): array
     {
-        return $this->api->getData('cashbox/', []);
+        return $this->api->request($this->endpoint, [], 'GET');
     }
 
-    public function getCashboxTransactions(int $cashbox_id, array $filter_data = [], bool $getAllPage): array
+    public function getTransactions(int $cashbox_id, array $filter_data = []): array
     {
-        $endpoint = 'cashbox/report/' . $cashbox_id;
-        return $this->api->getData($endpoint, $filter_data, $getAllPage);
+        return $this->api->request($this->endpoint . '/report/' . $cashbox_id, $filter_data, 'GET');
     }
     
     public function getCashflowItems(): array
     {
-        return $this->api->getData('cashflowitems/', []);
+        return $this->api->request('cashflowitems', [], 'GET');
     }
 
     public function createPayment(array $data = []): array
     {
-        return $this->api->request('cashbox/payment/', $data, 'POST');
+        return $this->api->request($this->endpoint . '/payment', $data, 'POST');
     }
 }

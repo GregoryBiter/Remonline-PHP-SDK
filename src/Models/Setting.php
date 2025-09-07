@@ -13,28 +13,27 @@ class Setting extends Models
     
     public function getCompanySetting(): array
     {
-        return $this->api->getData('settings/company', []);
+        return $this->api->request('settings/company', [], 'GET');
     }
 
     public function getLocations(): array
     {
-        return $this->response(
-            $this->api->getData('branches/', [])
-        );
+        return $this->api->request('branches', [], 'GET');
     }
 
     public function getAdCampaigns(): array
     {
-        return $this->response($this->api->getData('marketing/campaigns/', []));
+        return $this->api->request('marketing/campaigns', [], 'GET');
     }
+
     public function getPrices(): array
     {
-        return $this->api->getData('margins/', []);
+        return $this->api->request('margins', [], 'GET');
     }
 
     public function getEmployees(): array
     {
-        return $this->api->getData('employees/', []);
+        return $this->api->request('employees', [], 'GET');
     }
 
     public function getOrderTypes(): array
@@ -49,8 +48,6 @@ class Setting extends Models
 
     public function getBookList(): array
     {
-        return $this->api->getData('book/list/', []);
+        return $this->api->request('book/list', [], 'GET');
     }
-
-
 }

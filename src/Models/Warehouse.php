@@ -6,74 +6,49 @@ use Gbit\Remonline\RemonlineClient;
 
 class Warehouse extends Models
 {
+    private $endpoint = 'warehouse';
 
     public function __construct(RemonlineClient $api)
     {
         parent::__construct($api);
     }
 
-    public function get(?int $branch_id = null, bool $getAllPage = false): array
+    public function get(?int $branch_id = null): array
     {
-        return $this->api->getData('warehouse/', ['branch_id' => $branch_id], $getAllPage);
+        return $this->api->request($this->endpoint, ['branch_id' => $branch_id], 'GET');
     }
 
-
-    /**
-     * undocumented function summary
-     *
-     * Undocumented function long description
-     *
-     * @param Type $var Description
-     * @return type
-     * @throws conditon
-     **/
-    public function goods(int $warehouse_id, array $categories = [], bool $exclude_zero_residue = false, ?int $page = null, bool $getAllPage = false): array
+    public function goods(int $warehouse_id, array $categories = [], bool $exclude_zero_residue = false, ?int $page = null): array
     {
-        return $this->api->getData(
-            'warehouse/goods/' . $warehouse_id,
+        return $this->api->request(
+            $this->endpoint . '/goods/' . $warehouse_id,
             [
                 'categories' => $categories,
                 'exclude_zero_residue' => $exclude_zero_residue,
                 'page' => $page
             ],
-            $getAllPage
+            'GET'
         );
     }
 
-
-
-
-    // public function goods($warehouse_id, $categories = [], $exclude_zero_residue = false)
-    // {
-    //     $page = $this->page;
-    //     $this->page = null;
-    //     $in_data = array_merge($categories, ['page' => $this->page]);
-    //     $in_data['exclude_zero_residue'] = $exclude_zero_residue;
-    //     return $this->user->api('order/', array_merge($in_data, [
-    //         'page' => $page
-    //     ]), 'GET');
-    // }
-
-
-
-    public function getCategories()
+    public function getCategories(): array
     {
-        $response = $this->api->request('warehouse/categories/', [], 'GET');
-        return $response;
+        return $this->api->request($this->endpoint . '/categories', [], 'GET');
     }
-    public function getWarehouse($branch_id = null)
+
+    public function getPostings(int $warehouse_id = null, string $created_at = null, array $ids = null): array
     {
-        $response = $this->api->request('warehouse/', ['$branch_id' => $branch_id], 'GET');
-        return $response;
-    }
-    public function getPostings($warehouse_id = null, $created_at = null, $ids = null)
-    {
-        $in_data = [];
-        if ($warehouse_id != null) {
-            $in_data = array_merge($in_data, ['page' => $this->page]);
+        $params = [];
+        if ($warehouse_id !== null) {
+            $params['warehouse_id'] = $warehouse_id;
         }
-        $in_data = array_merge($warehouse_id = [], ['page' => $this->page]);
-        $response = $this->api->request('warehouse/', ['$branch_id' => $branch_id], 'GET');
-        return $response;
+        if ($created_at !== null) {
+            $params['created_at'] = $created_at;
+        }
+        if ($ids !== null) {
+            $params['ids'] = $ids;
+        }
+        
+        return $this->api->request($this->endpoint . '/postings', $params, 'GET');
     }
 }
