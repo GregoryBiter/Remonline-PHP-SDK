@@ -56,11 +56,22 @@ class Api
         switch (strtoupper($type)) {
             case 'GET':
                 if (!empty($params)) {
-                    $fullUrl .= '?' . http_build_query($params);
+                    // Строим строку запроса с повторяющимися ключами для массивов
+                    $queryParts = [];
+                    foreach ($params as $key => $value) {
+                        if (is_array($value)) {
+                            foreach ($value as $val) {
+                                $queryParts[] = urlencode($key) . '=' . urlencode($val);
+                            }
+                        } else {
+                            $queryParts[] = urlencode($key) . '=' . urlencode($value);
+                        }
+                    }
+                    $fullUrl .= '?' . implode('&', $queryParts);
                 }
                 curl_setopt($ch, CURLOPT_URL, $fullUrl);
                 break;
-                
+
             case 'POST':
                 curl_setopt($ch, CURLOPT_URL, $fullUrl);
                 curl_setopt($ch, CURLOPT_POST, true);
