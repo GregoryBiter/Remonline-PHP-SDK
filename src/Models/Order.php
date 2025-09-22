@@ -169,7 +169,7 @@ class Order extends Models
      */
     public function getPublicUrl(int $order_id): array
     {
-        return $this->api->request("{$this->endpoint}/{$order_id}/public_url", [], 'GET');
+        return $this->api->request("{$this->endpoint}/{$order_id}/public-url", [], 'GET');
     }
 
 }

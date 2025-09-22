@@ -28,21 +28,22 @@ class Api
      */
     public function api(string $url, array $params = [], string $type = 'GET', string $model = null): array
     {
+
         $fullUrl = self::APIURL . ltrim($url, '/');
-        
+
         // Initialize cURL
         $ch = curl_init();        // Prepare headers
         $headers = [
             'Authorization: Bearer ' . $this->apiKey,
             'Accept: application/json',
         ];
-        
+
         // Add Content-Type only if we have data to send as JSON
         $hasJsonData = !empty($params) && in_array(strtoupper($type), ['POST', 'PATCH', 'DELETE']);
         if ($hasJsonData) {
             $headers[] = 'Content-Type: application/json';
         }
-        
+
         // Set basic cURL options
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
@@ -51,7 +52,7 @@ class Api
             CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTPHEADER => $headers,
         ]);
-        
+
         // Handle different HTTP methods
         switch (strtoupper($type)) {
             case 'GET':
@@ -79,7 +80,7 @@ class Api
                     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
                 }
                 break;
-                
+
             case 'PATCH':
                 curl_setopt($ch, CURLOPT_URL, $fullUrl);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
@@ -87,7 +88,7 @@ class Api
                     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
                 }
                 break;
-                
+
             case 'DELETE':
                 curl_setopt($ch, CURLOPT_URL, $fullUrl);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
@@ -95,21 +96,21 @@ class Api
                     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
                 }
                 break;
-                
+
             default:
                 curl_close($ch);
                 throw new Exception('Unsupported HTTP method: ' . $type);
         }
-        
+
         // Execute request
         $response = curl_exec($ch);
-        
+
         // Check for cURL errors
         if ($response === false) {
             $curlError = curl_error($ch);
             $curlErrno = curl_errno($ch);
             curl_close($ch);
-            
+
             $logData = [
                 'curl_error' => $curlError,
                 'curl_errno' => $curlErrno,
@@ -117,9 +118,9 @@ class Api
                 'method' => $type,
                 'params' => $params
             ];
-            
+
             $this->push_logs('cURL Error: ' . json_encode($logData, JSON_UNESCAPED_UNICODE), true);
-            
+
             throw new RemonlineApiException(
                 'API request failed: ' . $curlError,
                 0,
@@ -128,36 +129,36 @@ class Api
                 $params
             );
         }
-        
+
         // Get HTTP status code
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        
+
         // Parse JSON response first to get error details
         $responseBody = json_decode($response, true);
-        
+
         // Check for HTTP errors
         if ($httpCode >= 400) {
             $errorMessage = 'API request failed with HTTP status: ' . $httpCode;
             $errorDetails = [];
-            
+
             // Try to extract error details from JSON response
             if (json_last_error() === JSON_ERROR_NONE && is_array($responseBody)) {
                 // Common error fields in APIs
                 $errorFields = ['error', 'message', 'error_description', 'errors', 'detail', 'details'];
-                
+
                 foreach ($errorFields as $field) {
                     if (isset($responseBody[$field])) {
                         $errorDetails[$field] = $responseBody[$field];
                     }
                 }
-                
+
                 // If we found error details, include them in the exception
                 if (!empty($errorDetails)) {
                     $errorMessage .= '. Error details: ' . json_encode($errorDetails, JSON_UNESCAPED_UNICODE);
                 }
             }
-            
+
             // Log the full error information
             $logData = [
                 'http_code' => $httpCode,
@@ -167,9 +168,9 @@ class Api
                 'response' => $response,
                 'error_details' => $errorDetails
             ];
-            
+
             $this->push_logs('HTTP Error: ' . json_encode($logData, JSON_UNESCAPED_UNICODE), true);
-            
+
             // Create custom exception with error details
             throw new RemonlineApiException(
                 $errorMessage,
@@ -179,7 +180,7 @@ class Api
                 $params
             );
         }
-        
+
         // Check for JSON parsing errors only for successful responses
         if (json_last_error() !== JSON_ERROR_NONE) {
             $jsonError = 'Invalid JSON response: ' . json_last_error_msg();
@@ -190,9 +191,9 @@ class Api
                 'url' => $fullUrl,
                 'method' => $type
             ];
-            
+
             $this->push_logs('JSON Error: ' . json_encode($logData, JSON_UNESCAPED_UNICODE), true);
-            
+
             throw new RemonlineApiException(
                 $jsonError,
                 0,
@@ -201,11 +202,11 @@ class Api
                 $params
             );
         }
-        
+
         if ($model) {
             $responseBody['model'] = $model;
         }
-        
+
         return $responseBody;
     }
 
