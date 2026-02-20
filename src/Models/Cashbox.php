@@ -15,7 +15,7 @@ class Cashbox extends Models
     
     public function get(): array
     {
-        return $this->api->request($this->endpoint, [], 'GET');
+        return $this->api->request($this->endpoint . '/', [], 'GET');
     }
 
     public function getTransactions(int $cashbox_id, array $filter_data = []): array

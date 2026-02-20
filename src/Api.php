@@ -6,7 +6,7 @@ class Api
 {
     protected $apiKey;
 
-    public const APIURL = 'https://api.remonline.app/';
+    public const APIURL = 'https://api.roapp.io/';
 
     /**
      * @param string $apiKey API key from RemOnline Settings > API section
@@ -26,7 +26,7 @@ class Api
      * @return array API response
      * @throws RemonlineApiException On request failure, invalid API key, rate limiting, or JSON parsing errors
      */
-    public function api(string $url, array $params = [], string $type = 'GET', string $model = null): array
+    public function api(string $url, array $params = [], string $type = 'GET', ?string $model = null): array
     {
 
         $fullUrl = self::APIURL . ltrim($url, '/');
