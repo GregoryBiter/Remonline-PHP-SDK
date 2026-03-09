@@ -37,7 +37,7 @@ class RemonlineApiException extends Exception
      * @param array $errorDetails Error details from API response
      * @param string $apiUrl API endpoint URL
      * @param array $requestData Original request parameters
-    * @param \Throwable|null $previous Previous exception
+     * @param Exception|null $previous Previous exception
      */
     public function __construct(
         string $message = '',
@@ -45,7 +45,7 @@ class RemonlineApiException extends Exception
         array $errorDetails = [],
         string $apiUrl = '',
         array $requestData = [],
-        ?\Throwable $previous = null
+        Exception $previous = null
     ) {
         parent::__construct($message, $httpCode, $previous);
         

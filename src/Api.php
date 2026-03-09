@@ -26,7 +26,7 @@ class Api
      * @return array API response
      * @throws RemonlineApiException On request failure, invalid API key, rate limiting, or JSON parsing errors
      */
-    public function api(string $url, array $params = [], string $type = 'GET', ?string $model = null): array
+    public function api(string $url, array $params = [], string $type = 'GET', string $model = null): array
     {
 
         $fullUrl = self::APIURL . ltrim($url, '/');
@@ -77,7 +77,7 @@ class Api
                 curl_setopt($ch, CURLOPT_URL, $fullUrl);
                 curl_setopt($ch, CURLOPT_POST, true);
                 if (!empty($params)) {
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params, JSON_UNESCAPED_UNICODE));
                 }
                 break;
 
@@ -85,7 +85,7 @@ class Api
                 curl_setopt($ch, CURLOPT_URL, $fullUrl);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
                 if (!empty($params)) {
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params, JSON_UNESCAPED_UNICODE));
                 }
                 break;
 
@@ -93,7 +93,7 @@ class Api
                 curl_setopt($ch, CURLOPT_URL, $fullUrl);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
                 if (!empty($params)) {
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params, JSON_UNESCAPED_UNICODE));
                 }
                 break;
 
