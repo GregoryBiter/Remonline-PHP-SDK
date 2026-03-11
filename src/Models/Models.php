@@ -7,7 +7,6 @@ use Gbit\Remonline\RemonlineClient;
 abstract class Models
 {
     protected $api;
-    private $map = [];
 
     protected $data = [];
     protected $meta = [];

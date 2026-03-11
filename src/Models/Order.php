@@ -8,9 +8,6 @@ class Order extends Models
 {
 
     private $endpoint = 'orders';
-    private $map = [
-
-    ];
     /**
      * Конструктор класса Order
      *
