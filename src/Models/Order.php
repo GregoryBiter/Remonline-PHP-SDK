@@ -169,4 +169,38 @@ class Order extends Models
         return $this->api->request("{$this->endpoint}/{$order_id}/public-url", [], 'GET');
     }
 
+    /**
+     * Удалить позицию из заказа
+     *
+     * @param int $order_id Идентификатор заказа
+     * @param int $item_id Идентификатор позиции
+     * @return array Результат удаления
+     */
+    public function deleteItem(int $order_id, int $item_id): array
+    {
+        return $this->api->request("{$this->endpoint}/{$order_id}/items/{$item_id}", [], 'DELETE');
+    }
+
+    /**
+     * Получить комментарии к заказу
+     *
+     * @param int $order_id Идентификатор заказа
+     * @return array Массив комментариев
+     */
+    public function getComments(int $order_id): array
+    {
+        return $this->api->request("{$this->endpoint}/{$order_id}/comments", [], 'GET');
+    }
+
+    /**
+     * Получить историю (лог) изменений заказа
+     *
+     * @param int $order_id Идентификатор заказа
+     * @return array Лог изменений
+     */
+    public function getLog(int $order_id): array
+    {
+        return $this->api->request("{$this->endpoint}/{$order_id}/log", [], 'GET');
+    }
+
 }

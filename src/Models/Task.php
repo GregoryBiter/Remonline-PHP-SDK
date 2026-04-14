@@ -47,4 +47,9 @@ class Task extends Models
     {
         return $this->api->request($this->endpoint . '/' . $task_id . '/comments', ['comment' => $comment], 'POST');
     }
+
+    public function getComments(int $task_id): array
+    {
+        return $this->api->request($this->endpoint . '/' . $task_id . '/comments', [], 'GET');
+    }
 }

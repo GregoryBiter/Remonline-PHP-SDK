@@ -75,4 +75,9 @@ class Invoice extends Models
     {
         return $this->api->request($this->endpoint . '/' . $invoice_id . '/mark-paid', $payment_data, 'POST');
     }
+
+    public function deleteItem(int $invoice_id, int $item_id): array
+    {
+        return $this->api->request($this->endpoint . '/' . $invoice_id . '/items/' . $item_id, [], 'DELETE');
+    }
 }

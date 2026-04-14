@@ -52,4 +52,9 @@ class People extends Models
     {
         return $this->api->request($this->endpoint . '/' . $person_id . '/merge', ['ids' => $ids], 'POST');
     }
+
+    public function getComments(int $person_id): array
+    {
+        return $this->api->request($this->endpoint . '/' . $person_id . '/comments', [], 'GET');
+    }
 }

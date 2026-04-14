@@ -62,4 +62,9 @@ class Organization extends Models
     {
         return $this->api->request($this->endpoint . '/' . $organization_id . '/merge', ['ids' => $ids], 'POST');
     }
+
+    public function getComments(int $organization_id): array
+    {
+        return $this->api->request($this->endpoint . '/' . $organization_id . '/comments', [], 'GET');
+    }
 }
