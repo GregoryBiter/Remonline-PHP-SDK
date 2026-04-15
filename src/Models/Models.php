@@ -1,8 +1,8 @@
 <?php
 
-namespace Gbit\Remonline\Models;
+namespace Gbit\Roapp\Models;
 
-use Gbit\Remonline\RemonlineClient;
+use Gbit\Roapp\RoappClient;
 
 abstract class Models
 {
@@ -15,7 +15,7 @@ abstract class Models
     protected $pageSize = null;
     protected $offset = null;
 
-    public function __construct(RemonlineClient $api)
+    public function __construct(RoappClient $api)
     {
         $this->api = $api;
     }
@@ -27,13 +27,13 @@ abstract class Models
      * @param array $params
      * @param string $method
      * @return array
-     * @throws \Gbit\Remonline\RemonlineApiException
+    * @throws \Gbit\Roapp\RoappApiException
      */
     protected function safeRequest(string $endpoint, array $params = [], string $method = 'GET'): array
     {
         try {
             return $this->api->request($endpoint, $params, $method);
-        } catch (\Gbit\Remonline\RemonlineApiException $e) {
+        } catch (\Gbit\Roapp\RoappApiException $e) {
             // Log detailed error information
             $this->logValidationError($e, $endpoint, $params, $method);
             
@@ -45,12 +45,12 @@ abstract class Models
     /**
      * Log validation error details
      * 
-     * @param \Gbit\Remonline\RemonlineApiException $exception
+     * @param \Gbit\Roapp\RoappApiException $exception
      * @param string $endpoint
      * @param array $params
      * @param string $method
      */
-    private function logValidationError(\Gbit\Remonline\RemonlineApiException $exception, string $endpoint, array $params, string $method): void
+    private function logValidationError(\Gbit\Roapp\RoappApiException $exception, string $endpoint, array $params, string $method): void
     {
         if ($exception->isValidationError()) {
             $logData = [
@@ -64,17 +64,17 @@ abstract class Models
                 'http_code' => $exception->getHttpCode()
             ];
             
-            \Gbit\Remonline\RemonlineClient::pushLogs($logData, true);
+            \Gbit\Roapp\RoappClient::pushLogs($logData, true);
         }
     }
 
     /**
      * Extract missing required fields from validation error
      * 
-     * @param \Gbit\Remonline\RemonlineApiException $exception
+    * @param \Gbit\Roapp\RoappApiException $exception
      * @return array
      */
-    private function getMissingRequiredFields(\Gbit\Remonline\RemonlineApiException $exception): array
+    private function getMissingRequiredFields(\Gbit\Roapp\RoappApiException $exception): array
     {
         $missingFields = [];
         $validationErrors = $exception->getValidationErrors();
@@ -99,10 +99,10 @@ abstract class Models
     /**
      * Get validation error summary for display
      * 
-     * @param \Gbit\Remonline\RemonlineApiException $exception
+    * @param \Gbit\Roapp\RoappApiException $exception
      * @return array
      */
-    public function getValidationErrorSummary(\Gbit\Remonline\RemonlineApiException $exception): array
+    public function getValidationErrorSummary(\Gbit\Roapp\RoappApiException $exception): array
     {
         if (!$exception->isValidationError()) {
             return [

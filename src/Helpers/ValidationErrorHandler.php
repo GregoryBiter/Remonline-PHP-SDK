@@ -1,22 +1,22 @@
 <?php
 
-namespace Gbit\Remonline\Helpers;
+namespace Gbit\Roapp\Helpers;
 
-use Gbit\Remonline\RemonlineApiException;
+use Gbit\Roapp\RoappApiException;
 
 /**
- * Utility class for handling RemOnline API validation errors
+ * Utility class for handling Roapp API validation errors
  */
 class ValidationErrorHandler
 {
     /**
      * Extract validation errors and format them for display
      * 
-     * @param RemonlineApiException $exception
+     * @param RoappApiException $exception
      * @param array $options Formatting options
      * @return array
      */
-    public static function formatValidationErrors(RemonlineApiException $exception, array $options = []): array
+    public static function formatValidationErrors(RoappApiException $exception, array $options = []): array
     {
         $defaultOptions = [
             'include_field_names' => true,
@@ -172,7 +172,7 @@ class ValidationErrorHandler
         // Проверяем наличие custom_fields ошибок
         foreach ($validationErrors as $field => $errors) {
             if (strpos($field, 'custom_fields') !== false) {
-                $suggestions[] = 'Для создания заказа необходимо заполнить дополнительные поля устройства. Проверьте настройки филиала в RemOnline.';
+                $suggestions[] = 'Для создания заказа необходимо заполнить дополнительные поля устройства. Проверьте настройки филиала в Roapp.';
                 break;
             }
         }
@@ -197,16 +197,16 @@ class ValidationErrorHandler
     /**
      * Generate console-friendly error report
      * 
-     * @param RemonlineApiException $exception
+     * @param RoappApiException $exception
      * @return string
      */
-    public static function generateConsoleReport(RemonlineApiException $exception): string
+    public static function generateConsoleReport(RoappApiException $exception): string
     {
         if (!$exception->isValidationError()) {
             return "Ошибка API: " . $exception->getUserFriendlyMessage();
         }
         
-        $report = "┌─ ОШИБКА ВАЛИДАЦИИ REMONLINE API ───────────────────────────┐\n";
+        $report = "┌─ ОШИБКА ВАЛИДАЦИИ ROAPP API ───────────────────────────┐\n";
         $report .= sprintf("│ HTTP Код: %-48s │\n", $exception->getHttpCode());
         $report .= "├────────────────────────────────────────────────────────────┤\n";
         

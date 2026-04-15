@@ -1,18 +1,18 @@
-# Пагинация в Remonline PHP SDK
+# Пагинация в Roapp PHP SDK
 
 ## Обзор
 
-SDK предоставляет удобные методы для работы с пагинацией данных из API RemOnline.
+SDK предоставляет удобные методы для работы с пагинацией данных из API Roapp.
 
 ## Методы пагинации
 
 ### 1. Пагинация по страницам
 
 ```php
-use Gbit\Remonline\RemonlineClient;
-use Gbit\Remonline\Models\Order;
+use Gbit\Roapp\RoappClient;
+use Gbit\Roapp\Models\Order;
 
-$client = new RemonlineClient('your-api-key');
+$client = new RoappClient('your-api-key');
 $orders = new Order($client);
 
 // Получить первую страницу (по умолчанию)
@@ -89,7 +89,7 @@ $totalPages = $orders->meta('total_pages');
 ### Простая пагинация
 
 ```php
-$client = new RemonlineClient('your-api-key');
+$client = new RoappClient('your-api-key');
 $orders = new Order($client);
 
 // Получить первую страницу

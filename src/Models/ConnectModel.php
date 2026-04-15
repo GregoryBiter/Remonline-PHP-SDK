@@ -1,8 +1,8 @@
 <?php
 
-namespace Gbit\Remonline\Models;
+namespace Gbit\Roapp\Models;
 
-use Gbit\Remonline\Models\Order;
+use Gbit\Roapp\Models\Order;
 
 trait ConnectModel 
 {

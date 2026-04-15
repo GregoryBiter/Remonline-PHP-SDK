@@ -1,14 +1,14 @@
 <?php
 
-namespace Gbit\Remonline\Models;
+namespace Gbit\Roapp\Models;
 
-use Gbit\Remonline\RemonlineClient;
+use Gbit\Roapp\RoappClient;
 
 class Task extends Models
 {
     private $endpoint = 'tasks';
 
-    public function __construct(RemonlineClient $api)
+    public function __construct(RoappClient $api)
     {
         parent::__construct($api);
     }

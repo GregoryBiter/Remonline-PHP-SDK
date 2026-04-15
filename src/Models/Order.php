@@ -1,8 +1,8 @@
 <?php
 
-namespace Gbit\Remonline\Models;
+namespace Gbit\Roapp\Models;
 
-use Gbit\Remonline\RemonlineClient;
+use Gbit\Roapp\RoappClient;
 
 class Order extends Models
 {
@@ -11,9 +11,9 @@ class Order extends Models
     /**
      * Конструктор класса Order
      *
-     * @param RemonlineClient $api Экземпляр клиента Remonline
+     * @param RoappClient $api Экземпляр клиента Roapp
      */
-    public function __construct(RemonlineClient $api)
+    public function __construct(RoappClient $api)
     {
         parent::__construct($api);
     }

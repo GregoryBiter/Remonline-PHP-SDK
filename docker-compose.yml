@@ -2,7 +2,7 @@ version: '3.8'
 services:
   php:
     image: php:7.4-cli
-    container_name: remonline-php
+    container_name: roapp-php
     working_dir: /app
     volumes:
       - ./:/app
@@ -13,7 +13,7 @@ services:
     depends_on: []
   composer:
     image: composer:2.2
-    container_name: remonline-composer
+    container_name: roapp-composer
     working_dir: /app
     volumes:
       - ./:/app

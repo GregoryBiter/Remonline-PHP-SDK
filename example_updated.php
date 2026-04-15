@@ -2,19 +2,19 @@
 
 require_once 'vendor/autoload.php';
 
-use Gbit\Remonline\RemonlineClient;
-use Gbit\Remonline\Models\Order;
-use Gbit\Remonline\Models\People;
-use Gbit\Remonline\Models\Product;
-use Gbit\Remonline\Models\Organization;
-use Gbit\Remonline\Models\Estimate;
-use Gbit\Remonline\Models\Assets;
-use Gbit\Remonline\Models\Cashbox;
-use Gbit\Remonline\Models\Setting;
-use Gbit\Remonline\Models\Warehouse;
+use Gbit\Roapp\RoappClient;
+use Gbit\Roapp\Models\Order;
+use Gbit\Roapp\Models\People;
+use Gbit\Roapp\Models\Product;
+use Gbit\Roapp\Models\Organization;
+use Gbit\Roapp\Models\Estimate;
+use Gbit\Roapp\Models\Assets;
+use Gbit\Roapp\Models\Cashbox;
+use Gbit\Roapp\Models\Setting;
+use Gbit\Roapp\Models\Warehouse;
 
 // Инициализация клиента
-$api = new RemonlineClient('your-api-key-here');
+$api = new RoappClient('your-api-key-here');
 
 try {
     // Работа с заказами

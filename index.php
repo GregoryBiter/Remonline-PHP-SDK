@@ -1,10 +1,9 @@
 <?php
 require __DIR__ . '/vendor/autoload.php';
+use Gbit\Roapp\RoappClient;
+use Gbit\Roapp\Models\Organization;
 
-use Gbit\Remonline\RemonlineClient;
-use Gbit\Remonline\Models\Organization;
-
-$api = new RemonlineClient("1830884e0176463b802684a7cef4ccaf");
+$api = new RoappClient("1830884e0176463b802684a7cef4ccaf");
 $organization = new Organization($api);
 $result = $organization->get(); // Example method call, adjust as needed
 

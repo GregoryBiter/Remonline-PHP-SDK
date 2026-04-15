@@ -1,5 +1,5 @@
 <?php
-namespace Gbit\Remonline;
+namespace Gbit\Roapp;
 use \Exception;
 
 class Api
@@ -9,7 +9,7 @@ class Api
     public const APIURL = 'https://api.roapp.io/';
 
     /**
-     * @param string $apiKey API key from RemOnline Settings > API section
+    * @param string $apiKey API key from Roapp Settings > API section
      */
     public function __construct(string $apiKey)
     {
@@ -17,14 +17,14 @@ class Api
     }
 
     /**
-     * Make API request to RemOnline
+    * Make API request to Roapp
      * 
      * @param string $url API endpoint
      * @param array $params Request parameters
      * @param string $type HTTP method (GET, POST, PATCH, DELETE)
      * @param string|null $model Optional model name to add to response
      * @return array API response
-     * @throws RemonlineApiException On request failure, invalid API key, rate limiting, or JSON parsing errors
+    * @throws RoappApiException On request failure, invalid API key, rate limiting, or JSON parsing errors
      */
     public function api(string $url, array $params = [], string $type = 'GET', string $model = null): array
     {
@@ -121,7 +121,7 @@ class Api
 
             $this->push_logs('cURL Error: ' . json_encode($logData, JSON_UNESCAPED_UNICODE), true);
 
-            throw new RemonlineApiException(
+            throw new RoappApiException(
                 'API request failed: ' . $curlError,
                 0,
                 ['curl_error' => $curlError, 'curl_errno' => $curlErrno],
@@ -172,7 +172,7 @@ class Api
             $this->push_logs('HTTP Error: ' . json_encode($logData, JSON_UNESCAPED_UNICODE), true);
 
             // Create custom exception with error details
-            throw new RemonlineApiException(
+            throw new RoappApiException(
                 $errorMessage,
                 $httpCode,
                 $errorDetails,
@@ -194,7 +194,7 @@ class Api
 
             $this->push_logs('JSON Error: ' . json_encode($logData, JSON_UNESCAPED_UNICODE), true);
 
-            throw new RemonlineApiException(
+            throw new RoappApiException(
                 $jsonError,
                 0,
                 ['json_error' => json_last_error_msg(), 'json_error_code' => json_last_error()],

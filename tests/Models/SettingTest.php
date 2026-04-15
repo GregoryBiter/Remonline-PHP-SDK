@@ -1,8 +1,8 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use Gbit\Remonline\Models\Setting;
-use Gbit\Remonline\RemonlineClient;
+use Gbit\Roapp\Models\Setting;
+use Gbit\Roapp\RoappClient;
 
 class SettingTest extends TestCase
 {
@@ -11,7 +11,7 @@ class SettingTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->apiMock = $this->createMock(RemonlineClient::class);
+        $this->apiMock = $this->createMock(RoappClient::class);
         $this->setting = new Setting($this->apiMock);
     }
 

@@ -1,11 +1,11 @@
-# Remonline-PHP-SDK
+# Roapp-PHP-SDK
 
-PHP SDK для работы с API RemOnline CRM - системы управления ремонтом и сервисным обслуживанием.
+PHP SDK для работы с API Roapp CRM - системы управления ремонтом и сервисным обслуживанием.
 
 ## 📦 Установка
 
 ```bash
-composer require gregorybiter/remonline-sdk
+composer require gregorybiter/roapp-sdk
 ```
 
 **Требования:**
@@ -14,9 +14,9 @@ composer require gregorybiter/remonline-sdk
 
 ## 🔑 Аутентификация
 
-SDK использует **Bearer Token** для аутентификации согласно обновлённому API RemOnline.
+SDK использует **Bearer Token** для аутентификации согласно обновлённому API Roapp.
 
-1. Получите API ключ в **RemOnline > Настройки > API**
+1. Получите API ключ в **Roapp > Настройки > API**
 2. Используйте его при инициализации клиента
 
 ## ⚡ Быстрый старт
@@ -25,13 +25,13 @@ SDK использует **Bearer Token** для аутентификации с
 <?php
 require __DIR__ . '/vendor/autoload.php';
 
-use Gbit\Remonline\RemonlineClient;
-use Gbit\Remonline\Models\Order;
-use Gbit\Remonline\Models\People;
-use Gbit\Remonline\Models\Product;
+use Gbit\Roapp\RoappClient;
+use Gbit\Roapp\Models\Order;
+use Gbit\Roapp\Models\People;
+use Gbit\Roapp\Models\Product;
 
 // Инициализация клиента
-$api = new RemonlineClient("your_api_key_here");
+$api = new RoappClient("your_api_key_here");
 
 // Работа с заказами
 $orderModel = new Order($api);
@@ -54,14 +54,14 @@ $products = $productModel->get();
 
 ## 🔥 Обработка ошибок
 
-SDK предоставляет расширенную обработку ошибок через `RemonlineApiException`:
+SDK предоставляет расширенную обработку ошибок через `RoappApiException`:
 
 ```php
-use Gbit\Remonline\RemonlineApiException;
+use Gbit\Roapp\RoappApiException;
 
 try {
     $order = $orderModel->getById(12345);
-} catch (RemonlineApiException $e) {
+} catch (RoappApiException $e) {
     // Получить HTTP код ошибки
     echo "HTTP Code: " . $e->getHttpCode() . "\n";
     
@@ -104,7 +104,7 @@ $errors = $e->getFieldErrors('client_id');
 Для низкоуровневых запросов используйте класс `Api`:
 
 ```php
-use Gbit\Remonline\Api;
+use Gbit\Roapp\Api;
 
 $api = new Api('your_api_key_here');
 
@@ -130,7 +130,7 @@ $response = $api->api('tasks/456', [], 'DELETE');
 ### 🛒 Orders (Заказы)
 
 ```php
-use Gbit\Remonline\Models\Order;
+use Gbit\Roapp\Models\Order;
 
 $order = new Order($api);
 
@@ -167,7 +167,7 @@ $order->delete(123);
 ### 👥 People (Клиенты)
 
 ```php
-use Gbit\Remonline\Models\People;
+use Gbit\Roapp\Models\People;
 
 $people = new People($api);
 
@@ -203,7 +203,7 @@ $people->merge(100, [101, 102]);
 ### 📦 Products (Товары)
 
 ```php
-use Gbit\Remonline\Models\Product;
+use Gbit\Roapp\Models\Product;
 
 $product = new Product($api);
 
@@ -233,7 +233,7 @@ $product->delete(50);
 ### 🛠️ Services (Услуги)
 
 ```php
-use Gbit\Remonline\Models\Service;
+use Gbit\Roapp\Models\Service;
 
 $service = new Service($api);
 
@@ -268,7 +268,7 @@ $service->delete(10);
 ### ✅ Tasks (Задачи)
 
 ```php
-use Gbit\Remonline\Models\Task;
+use Gbit\Roapp\Models\Task;
 
 $task = new Task($api);
 
@@ -301,7 +301,7 @@ $task->delete(200);
 ### 📄 Invoices (Счета)
 
 ```php
-use Gbit\Remonline\Models\Invoice;
+use Gbit\Roapp\Models\Invoice;
 
 $invoice = new Invoice($api);
 
@@ -349,7 +349,7 @@ $invoice->delete(300);
 ### 💰 Sales (Продажи)
 
 ```php
-use Gbit\Remonline\Models\Sale;
+use Gbit\Roapp\Models\Sale;
 
 $sale = new Sale($api);
 
@@ -394,7 +394,7 @@ $sale->delete(400);
 ### 👤 Users (Пользователи)
 
 ```php
-use Gbit\Remonline\Models\User;
+use Gbit\Roapp\Models\User;
 
 $user = new User($api);
 
@@ -442,7 +442,7 @@ $user->delete(5);
 ### 🏭 Warehouse (Склад)
 
 ```php
-use Gbit\Remonline\Models\Warehouse;
+use Gbit\Roapp\Models\Warehouse;
 
 $warehouse = new Warehouse($api);
 
@@ -494,7 +494,7 @@ $response = $api->requestWithRetry(
 SDK автоматически логирует ошибки в `logs/error.log`:
 
 ```php
-use Gbit\Remonline\Api;
+use Gbit\Roapp\Api;
 
 // Записать свой лог
 Api::push_logs('Произошло событие', false); // false = warning, true = error
@@ -504,11 +504,11 @@ Api::push_logs('Произошло событие', false); // false = warning, 
 
 - [PAGINATION.md](docs/PAGINATION.md) - Подробности работы с пагинацией
 - [MIGRATION_GUIDE.php](MIGRATION_GUIDE.php) - Руководство по миграции
-- [Официальная документация API RemOnline](https://api.remonline.app/docs)
+- [Официальная документация API Roapp](https://api.remonline.app/docs)
 
 ## 🤝 Поддержка
 
-- **Issues**: [GitHub Issues](https://github.com/GregoryBiter/Remonline-PHP-SDK/issues)
+- **Issues**: [GitHub Issues](https://github.com/GregoryBiter/Roapp-PHP-SDK/issues)
 - **Email**: gregorybiter@gmail.com
 
 ## 📄 Лицензия

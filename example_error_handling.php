@@ -2,20 +2,20 @@
 
 require_once 'vendor/autoload.php';
 
-use Gbit\Remonline\RemonlineClient;
-use Gbit\Remonline\RemonlineApiException;
+use Gbit\Roapp\RoappClient;
+use Gbit\Roapp\RoappApiException;
 
 // Пример использования с обработкой ошибок
 try {
-    $client = new RemonlineClient('your-api-key-here');
+    $client = new RoappClient('your-api-key-here');
     
     // Выполняем запрос
     $response = $client->request('orders', [], 'GET');
     
     echo "Успешный ответ: " . json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     
-} catch (RemonlineApiException $e) {
-    echo "Ошибка API RemOnline:\n";
+} catch (RoappApiException $e) {
+    echo "Ошибка API Roapp:\n";
     echo "Код ошибки: " . $e->getHttpCode() . "\n";
     echo "Сообщение: " . $e->getMessage() . "\n";
     echo "Понятное сообщение: " . $e->getUserFriendlyMessage() . "\n";
@@ -48,13 +48,13 @@ try {
 
 // Пример с автоматическими повторами при rate limit
 try {
-    $client = new RemonlineClient('your-api-key-here');
+    $client = new RoappClient('your-api-key-here');
     
     // Запрос с автоматическими повторами
     $response = $client->requestWithRetry('orders', [], 'GET', '', 3, 2);
     
     echo "Ответ получен (возможно, после повторов): " . json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     
-} catch (RemonlineApiException $e) {
+} catch (RoappApiException $e) {
     echo "Не удалось выполнить запрос даже с повторами: " . $e->getUserFriendlyMessage() . "\n";
 }

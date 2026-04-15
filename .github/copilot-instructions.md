@@ -1,19 +1,19 @@
 ---
-name: remonline-api-instructions
-description: "Основная инструкция по использованию API Remonline — источник истины: https://roappua.readme.io/"
+name: roapp-api-instructions
+description: "Основная инструкция по использованию API Roapp — источник истины: https://roappua.readme.io/"
 applyTo:
   - "src/**"
   - "example_*.php"
   - "README.md"
 ---
 
-Use when: работа с API Remonline, моделями и примерами вызовов в проекте.
+Use when: работа с API Roapp, моделями и примерами вызовов в проекте.
 
 Основные правила:
 - Авторитетная документация: всегда сверяйтесь с https://roappua.readme.io/ при выборе endpoint, параметров, форматов ответа и схем аутентификации.
 - Не изобретать свои имена полей или форматы: используйте имена и структуры, указанные в документации.
 - Аутентификация: реализуйте и показывайте примеры в соответствии с разделом auth на roappua.readme.io.
-- В исходниках используйте существующие абстракции: `RemonlineClient`, `Api.php` и модели в `src/Models`.
+- В исходниках используйте существующие абстракции: `RoappClient`, `Api.php` и модели в `src/Models`.
 - Примеры кода и паттерны должны соответствовать стилю проекта (PSR-12, Composer autoload).
 - Изменения API-интерфейсов должны сопровождаться тестами в `tests/` и обновлением `README.md`.
 
@@ -22,7 +22,7 @@ MCP / интеграция внешних инструментов:
 - Для discovery указывайте `GET /mcp/manifest` с полями `name`, `repo`, `description`, `docs`.
 
 Примеры подсказок для агента (use-as prompts):
-- "Сгенерируй пример вызова API для создания счета согласно схеме на https://roappua.readme.io/ — используй `RemonlineClient` и возвращаемые модели из `src/Models`."
+- "Сгенерируй пример вызова API для создания счета согласно схеме на https://roappua.readme.io/ — используй `RoappClient` и возвращаемые модели из `src/Models`."
 - "Проверь соответствие модели `Invoice` полям в документации https://roappua.readme.io/ и предложи тесты для `tests/Models/InvoiceTest.php`."
 
 Если нужно уточнить:

@@ -1,6 +1,6 @@
 {
-    "name": "gregorybiter/remonline-sdk",
-    "description": "sdk viber bot rest",
+    "name": "gregorybiter/roapp-sdk",
+    "description": "sdk roapp bot rest",
     "type": "library",
     "require": {
         "php": ">=7.4"
@@ -8,7 +8,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Gbit\\Remonline\\": "src/"
+            "Gbit\\Roapp\\": "src/"
         }
     },
     "config": {
