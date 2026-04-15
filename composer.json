@@ -10,6 +10,10 @@
         "psr-4": {
             "Gbit\\Roapp\\": "src/"
         }
+            ,
+            "files": [
+                "src/compat.php"
+            ]
     },
     "config": {
         "sort-packages": true
